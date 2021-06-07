@@ -1,0 +1,57 @@
+When it comes to aggregating, there are a variety of different methods which people have tried so as to achieve different results.
+This can vary from using encrypted data, simple weighted-averaging of data or more robust methods.
+When it comes to non-robust strategies, the typical focus is on trying to make the accuracy as good as possible and ideally with non-iid data.
+
+
+\subsection{FedSGD}
+FedSGD is based on the idea that you would sample the gradients of the model from each client and then have them all averaged proportionally based on the number of samples of each client.
+The update strategy is very simple as it is just SGD but I will outline the formula for clarity:
+\begin{equation}
+    \omega_j = \omega_j - \alpha \dfrac{\delta E_i}{\delta \omega_j}
+\end{equation}
+Where E is the error function (typically $L^2$ norm or cross-entropy) and w is the parameter that's being updated.
+\\ \\
+It also sometimes involves selective parameter update where only a certain number of the parameters are chosen each round.
+This can be done at random but a smarter way is to use the models that have the largest gradient change and so in theory will contribute the most to the global model.
+
+
+\subsection{FedAvg}
+FedAvg was made to improve on FedSGD by instead focusing on the model weights instead of the model gradients \cite[section 2.1]{robagg_health}.
+This has been shown to be an improvement on using the gradients and is typically what is used for other forms of aggregation today.
+The formula for it is described here:
+\begin{equation}
+    \theta_g = \mathlarger{\mathlarger{\sum}}_{i=0}^{\infty} \dfrac{d_i}{d} \theta_i
+\end{equation}
+Where $d$ denotes the entire dataset size, $d_i$ is the size of the dataset for model i and theta is the model parameter.
+
+
+\subsection{Federated Matched Averaging}
+Federated Matched Averaging (FedMA) \cite{fedma} was brought about to solve federated learning accuracy problems that occur in modern architectures and models such as LSTMs and CNNs.
+Due to their deep and more complex nature, these architectures don't aggregate well under more coordinated style aggregations, like those found in FedAvg.
+\\ \\
+The algorithm works by aggregating the models layer-by-layer by starting with the initial layer and performing a weighted-averaging on it.
+It then proceeds to broadcast this layer out to the clients and the clients then continue to train all of the layers after the broadcasted layer for a few rounds.
+The aggregation then happens for the second layer and the process is repeated until the last layer.
+Now, the number of times communication is required is equivalent to the number of layers and not a more arbitrary hyper-parameter set by the central server.
+In theory, FedMA is then supposed to have far fewer number of communication rounds compared to FedAvg while out-performing it.
+Experiments show \cite{fedma} that FedMA is capable of out-performing all other aggregation methods in accuracy across a variety of datasets that use more complex architectures.
+
+
+\subsection{Auto-FedAvg}
+Auto-FedAvg \cite{autofa} was born out of the need to be able to handle non-iid data as well as just in general achieve a greater accuracy.
+The main concept behind it is that instead of having the weights for the weighted-averaging of the aggregation be fixed, they become learnable parameters that can adapt as the aggregation rounds occur.
+\\ \\
+In this algorithm there are 2 sets of weights: $\alpha$ and $\beta$.
+$\alpha$ contains the set of learnable weights that the central server uses for aggregation and $\beta$ is what $\alpha$ is parametised by during the learning process through an activation function $\gamma$.
+In this case $\gamma$ can either be the Softmax function or a Dirichlet distribution where $\alpha$ is the set of random variables with concentration $\beta$. 
+Dirichlet is as follows:
+\begin{equation}
+    Dir(\alpha | \beta) = \dfrac{1}{B(\beta)} \mathlarger{\mathlarger{\prod}}_{k=1}^{K} \alpha_k^{\beta_k-1}
+\end{equation}
+where $B(\beta) = \frac{\prod_{k=1}^K \Gamma(\beta_k)}{\Gamma (\sum_{k=1}^K \beta_k)}$ and $\Gamma(z) = \Sigma_0^\infty x^{z-1} e^{-x} dx$ is the gamma function.
+\\ \\
+Each round, the clients sample a mini-batch of their data and compute the $\alpha$ before using these weights in the aggregation.
+The loss of the $\beta$ weights is then calculated with regards to the mini-batched data before $\beta$ is subsequently updated with $\gamma$.
+The server then gathers up each $\beta$ weights from each client's local loss calculation and they are averaged to form the $\beta$ for the next round that is used to calculate the $\alpha$.
+\\ \\
+\textit{N.B. the paper relating to this method \cite{autofa} was released in April of 2021 and is still under development. As such, the methodology and implementation is still up to change as well as their experimentation results. In this area, it claims to be SotA and actively claims that it is better than FedMA in similar tasks but this hasn't been peer-reviewed as of yet.}
