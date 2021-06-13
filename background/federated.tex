@@ -1,15 +1,27 @@
-Throughout all the different types of privacy preserving mechanisms you can employ on data needed for ML models, if we didn't have to worry about the data ever leaving the hands of those that own it or who govern over it, then we would have much less of an issue. What if we decided to instead have the clients process the data on their own devices and then send the result to a centralised server for aggregation. This is the idea behind Federated Learning (FL).
+If data stayed amongst those that owned or governed it, then there would be less of a need for privacy preserving mechanisms. 
+However in FL, while clients do process data on their own devices, the results are then sent to a centralised server for aggregation. 
 \\ \\
-In FL we are trying to have all the clients keep hold of their data while being able to contribute it in a form that doesn't actually involve the sharing of it. The data is usually uneven as each client involved could have wildly different sizes of data or even wildly different backgrounds for the data. Two examples of this would be:
+In FL we are trying to have all the clients keep hold of their data whilst still being able to contribute it in a form that doesn't actually involve the sharing of it. The data is usually uneven as each client involved could have wildly different sizes of data or even wildly different backgrounds for the data. Two examples of this would be:
 \begin{enumerate}
-    \item Monitoring users' interactions with an app and training a model on the user's phone to make accurate predictions about what ads they'll like. The model update calculated will be hyper-specific and over-fitted to an individual user at first. But when you get 10s of 100s of users' models all being sent to a centralised server for aggregation, the model that will be sent back to each user will be much more generalised and better at making more accurate/clever predictions. Through more rounds of back and forth it will eventually converge.
+    \item Monitoring users' interactions with an app and training a model on the user's phone to make accurate predictions about what ads they'll like. 
+    The model update calculated will be hyper-specific and over-fitted to an individual user at first. 
+    But when you get 10s of 100s of users' models all being sent to a centralised server for aggregation, the model that will be sent back to each user will be much more generalised and better at making more accurate/clever predictions. 
+    Through more rounds of back and forth it will eventually converge.
     
-    \item If you had a group of hospitals that all had a large amount of patient data and they wanted to train a model for some arbitrary reason, they would be able to again train locally and send off the model just like before. However, you could end up having 1 hospital that deals with a disproportionately large amount of elderly patients and their model would be skewed in that favour. This can help the other hospitals who don't have as much access to such data and help that hospital by getting more access to younger patient data so that they are more easily able to generalise regardless of the age.
+    \item If you had a group of hospitals that all had a large amount of patient data and they wanted to train a model for some arbitrary reason, they would be able to again train locally and send off the model just like before. 
+    However, you could end up having 1 hospital that deals with a disproportionately large amount of elderly patients and their model would be skewed in that favour. 
+    This can help the other hospitals who don't have as much access to such data. 
+    This is a mutually beneficial exchange, as it also gives the original hospital more access to younger patient data. 
+    As such, results are more easily able to generalise regardless of the age.
 \end{enumerate}
-As you can see, through FL, we are able to get more accurately trained models on otherwise untouchable data (or at least data that shouldn't ever need to leave the users' devices). This provides unprecedented potential for medical data to be used for research purposes where we won't need direct access to the data. However, as too-good-to-be-true as this might sound, there are obvious barriers in the way. For the hospitals and practices, not only will they have to standardise all of their data in an agreed-upon way, they will also have to hugely invest in some form of computing infrastructure such as something on-premise or in the cloud \cite{future_health_fl}. This involves a high initial cost as there is computing power needed for training such large amounts of data. This also does not mean that researchers outside of the hospital will even be able to use the data anyway, just that the Clinicians, Patients, Manufacturers and Healthcare providers can all benefit from the improvement of the ML-based systems \cite{future_health_fl}.
+As you can see, through FL, we are able to get more accurately trained models on otherwise private and sensitive data. 
+This provides unprecedented potential for medical data to be used for research purposes where we won't need direct access to the data. However, as too-good-to-be-true as this might sound, there are obvious barriers in the way. 
+For the hospitals and practices, not only will they have to standardise all of their data in an agreed-upon way, they will also have to hugely invest in some form of computing infrastructure such as something on-premise or in the cloud \cite{future_health_fl}. 
+This involves a high initial cost as there is computing power needed for training such large amounts of data. 
+This also does not mean that researchers outside of the hospital will even be able to use the data anyway, just that the Clinicians, Patients, Manufacturers and Healthcare providers can all benefit from the improvement of the ML-based systems \cite{future_health_fl}.
 
 \subsection{Training}
-The process of training the data for Fl is as follows and is shown graphically in \ref{fig:federated_learning}:
+The process of training the data for Fl is as follows and is shown graphically in Figure \ref{fig:federated_learning}:
 \begin{enumerate}
     \item Clients retrieve model from the central server.
     
@@ -37,7 +49,7 @@ In comparison to a baseline model with no FL employed, close to the exact same r
 \subsection{Personalised Federated Learning}
 Through this typical process of training, every client receives the same global model that has been aggregated through a contribution from everyone in some way, shape or form.
 However, this might end up not being the most ideal strategy for achieving the best accuracy globally and locally.
-Especially when it comes to non-independent and identically distributed (iid), being able to adapt the models that are sent out could be crucial for getting good performance.
+Especially when it comes to non-independent and identically distributed (iid) data, being able to adapt the models that are sent out could be crucial for getting good performance.
 \\ \\
 One style in which this can be done is with Federated First Order Model Optimisation (FedFomo) \cite{fedfomo}.
 Here, the method involves each client having a goal that it aims for that is based on its own validation and test data.
@@ -51,7 +63,7 @@ However, there are a variety of different ways in which this personalisation cou
 Attempting to amplify privacy via user sampling is a method in which not all clients are chosen to participate at every federated round.
 Its main use is for helping to preserve the privacy of the clients involved through minimising honest-but-curious clients' interest in information leakage.
 \\ \\
-This seems like it would be an interesting to help the clients' privacy but unfortunately it isn't without its drawbacks.
+This seems like it would be an interesting solution to help the clients' privacy but unfortunately it isn't without its drawbacks.
 Experiments have shown that generally decreasing the probability (p) for clients to be picked leads to quite a significant decrease in convergence rate as well as a decrease in training accuracy \cite{privamp}.
 \\ \\
 Depending on what trade-offs you are willing to make, its gives the user quite a bit of flexibility in terms of having either more privacy, better accuracy or some combination of both.
@@ -66,8 +78,12 @@ Targeted attacks focus on the attacker trying to get the model to predict a spec
 Untargeted attacks are just when the attacker tries to get the model to not reach convergence or a good accuracy.
 \\ \\
 Some different styles of poisoning (changing something in a negative manner) are highlighted in Table \ref{tbl:poisoning}. 
-All methods excluding the final option are pretty standardly available to any client that we might consider going forth. 
-This is because the client owns their data and as such is in full control and can change it as needed. In terms of model reading and writing, the client has to receive the model and can send back whatever they like. The central server has no way of stopping any of this and without breaking the whole notion behind federated learning, cannot have the clients data checked for tampering. In theory if you had control of the client side as well (e.g. a mobile app), then you probably wouldn't need to worry about the model poisoning side of things. For the final row, this assumes that the malicious client essentially has complete control over the system and at this point it is essentially impossible to design a robust aggregation system \cite{robagg_fl}.
+All methods excluding the final option are easily accessible to any client.
+This is because the client owns their data and as such is in full control and can change it as needed. 
+In terms of model reading and writing, the client will receive the model and can send back whatever they like. 
+The central server has no way of stopping any of this and without breaking the whole notion behind federated learning, cannot have the clients data checked for tampering (unless some encrypted form of ML was used, which is extremely slow and computationally expensive). 
+In theory if you had control of the client side as well (e.g. a mobile app), then you probably wouldn't need to worry about the model poisoning side of things. 
+The final option assumes that the malicious client essentially has complete control over the system and at this point it is essentially impossible to design a robust aggregation system \cite{robagg_fl}.
 \begin{center}
     \begin{longtable}{ |c|c|c|c|c| }
     \caption{Poisoning Attacks \& Corruption Examples \cite{robagg_fl} - \textbf{Data Write} is changing of data in dataset, \textbf{Model Read} executing code based on model update before update takes place, \textbf{Model Write} is running code instead of standard update code and \textbf{Aggregation} is running code instead of the standard aggregation function on the central server}
@@ -81,14 +97,22 @@ This is because the client owns their data and as such is in full control and ca
     Byzantine & Yes & Yes & Yes & Yes \ \\ \hline
     \end{longtable}
 \end{center}
-There's also the case to handle where it may look like an attacker is trying to cause damage when it actuality it's just a faulty client. Depending on the level of damage done it may be beneficial to actually not block faulty clients as they could just be a bit noisy which might be able to improve the model's ability to generalise well \cite{dnn_noise, robust_corrupt_noise}. However, you are most likely going to end up blocking them as they could be damaging your performance without themselves realising it.
+There's also the case to handle where it may look like an attacker is trying to cause damage when it actuality it's just a faulty client. 
+Depending on the level of damage done it may be beneficial to actually not block faulty clients, as they may introduce noise that improves the model's generalisability \cite{dnn_noise, robust_corrupt_noise}. 
+However, you are most likely going to end up blocking them as they could be damaging your performance without themselves realising it.
 
 \subsubsection{Data Poisoning}
-This usually involves simply just maliciously changing the data for any type of attack. It could be done by adding noise or changing labels but as long as the original dataset has been changed, it is considered as having undergone a data poisoning attack. It has been shown that data poisoning attacks have been able to achieve a high-confidence of misclassification for deep NN \cite{poison_dnn}. \\ \\
-There is also a difference between static and adaptive data poisoning. Static is where you poison the data once at the beginning before any training occurs and then you let it run. Adaptive is seeing how the models change and then change the data at the beginning of each round so as to accommodate for it. Adaptive is more complex but could have the potential to achieve better results as the attack ends up being more tailored.
+This involves maliciously changing the data in an attack. 
+It could be done by adding noise or changing labels but as long as the original dataset has been changed, it is considered as having undergone a data poisoning attack. 
+It has been shown that data poisoning attacks have been able to achieve a high-confidence of misclassification for deep NN \cite{poison_dnn}. 
+\\ \\
+There is also a difference between static and adaptive data poisoning. 
+Static is where the data is poisoned once at the beginning (prior to training). 
+Adaptive is seeing how the models change and then change the data at the beginning of each round so as to accommodate for it. 
+Adaptive is more complex but could have the potential to achieve better results as the attack ends up being more tailored.
 
 \subsubsection{Model Poisoning}
-This doesn't target the data specifically but now actually uses the model to help craft a more specially designed model update. 
+This technique uses the model to help craft a specially designed model update. 
 In the targeted case, we would have a goal for misclassification but with all of the other users averaging out the poisoning, we would need to change the update in such a way as to negate the combined effects of the benign clients.
 Evaluation done has shown that this can lead to 100\% confidence in target misclassification while also impressively achieving convergence of the model \cite{adversarial_lens}. 
 \\ \\

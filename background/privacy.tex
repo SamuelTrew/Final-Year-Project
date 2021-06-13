@@ -1,32 +1,23 @@
-With various methods of ML being applied to all manner of things to try and help make predictions about life better, it is only natural that the data in question will include personal data. Whether this is through monitoring app/website usage or very simply tracking what people ``like" or send to each other, the data is personal to each user and as such the experience of each user is personal. \\ \\
+With various methods of ML being applied to all manner of things to try and help make better predictions, it is only natural that the data in question will include personal data. 
+Whether this is through monitoring app/website usage or simply tracking what people send to each other, the data is personal to each user and as such the experience of each user is personal. 
+\\ \\
 However, data can stray beyond this into more truly personal information such as that of the medical nature.
-This is trickier to deal with, given that medical data is very tightly controlled and restricted due to its highly sensitive nature and the governing bodies controlling it are usually very unwilling to share. 
+This is trickier to deal with from an analytical perspective, given that medical data is very tightly controlled and restricted due to its highly sensitive nature and the governing bodies controlling it are usually very unwilling to share. 
 Now in the past this wasn't really an issue as typically only medical professionals of the governing organisation (e.g. the National Health Service (NHS)) would want access to this data and actually have any good reason. 
 So it was very easy and efficient to deny any external access. 
 However, we now live in a world where the prevalence of ML has made external researchers' access to data increasingly valuable to society. 
-Users, beyond medical professionals, want access to this highly sensitive data to try and make the world a better place.
+Users, beyond medical professionals, want access to this highly sensitive data to try and develop new, beneficial tools.
 \\ \\
-Whether this is in trying to train a model to recognise cancerous cells or early onset dementia, data surrounding that is needed to accurately make these predictions. 
-So, to be able to push the field of medicine forward and to leverage to full power of modern day computing, we as software engineers need access to this data. 
-So several methods of trying to preserve the privacy of the users of this data have been created to tackle this.
-
-\subsection{Homomorphic Encryption}
-Encrypting data seems to be a fairly intuitive starting point for trying to keep the privacy of user's data secured. 
-For cloud computing \cite{cloud_fhe}, it is almost a necessity that the data is encrypted in some manner as otherwise employees of the company potentially have access to this data and could act maliciously \cite{access_private}. 
-However, it results in a system where no one can read or understand the data without the appropriate decryption keys (usually not stored on a centralised server) and so trying to perform any calculations or processing on the data is somewhat redundant. 
-So in comes the idea of Homomorphic Encryption. This is a style of encrypting data such that you are able to perform some given calculation on the encrypted data without the need for decrypting it first (e.g. addition).
-\\ \\ 
-However, only being able to perform 1 operation on the data isn't particularly useful and so the more impressive standard of Fully Homomorphic Encryption (FHE) was postulated \cite{fhe}. 
-In theory, FHE allows for any number of operations to be performed (although current operations are typically just addition and multiplication) on the encrypted data. 
-However, it is not a simple/intuitive system to implement for any given task and so for certain tasks, it may not be an ideal method on preserving the privacy of data.
+Whether this is in trying to train a model to recognise cancerous cells or early onset dementia, data surrounding that is needed to accurately make predictions. 
+So, to be able to push the field of medicine forward and to leverage to full power of modern day computing, access to medical data needs to be granted to software engineers.
+So several methods of trying to preserve the privacy of the users of this data have been created to tackle this. Only methods directly relevant to our work will be covered in this project.
 
 
 \subsection{K-Anonymisation}
-The idea behind anonymising data is to not be able to associate an individual person's data record with their actual identity in a given dataset. 
-This helps to reassure that the data will not cause any worry or harm to that individual. This has the added side-effect of no longer making the data personal anymore and so more freely able to be used beyond the governing owner of that data. 
+The idea behind anonymising data is to not be able to link an individual person's data record with their actual identity in a given dataset. This gives reassurance to the individual, whose private data has been given to the system, that there will be no risk of association and its subsequent repercussions. This depersonalises data, so that is able to be used beyond the governing owner of that data. 
 This is hugely beneficial to both parties and is a great starting point for preserving the privacy of the data. 
 \\ \\
-However, this is not as simple as it sounds and many attempts to pseudo-anonymise the data have resulted in people able to use more than one available dataset to link medical data with more available (and less sensitive) data like a voter list \cite{failed_anonymisation}.
+However, this is not as simple as it sounds and many attempts to pseudo-anonymise the data have resulted in people able to link medical data with more available (and less sensitive) data like a voter list \cite{failed_anonymisation}.
 \\ \\
 Even if that weren't the case, you get certain attributes that when taken together are potentially able to identify a person. These are called quasi-identifiers. 
 An example would be if you knew their post code and their date-of-birth, you could potentially figure out a disease they have if no one in that postcode shares that date-of-birth with them. e.g. id=3 in Table \ref{tbl:pre-anon}.
@@ -61,18 +52,7 @@ Two main ways of achieving k-anonymity for non-perturbative methods are generali
     \end{longtable}
 \end{center}
 
-The data is still susceptible to homogeneity and semantic attacks [Table \ref{tbl:2-anon}] and while {l-Diversity} can fix the former there is never any guarantee that a dataset is 100\% completely and truly anonymised. With k-anonymisation, a specific data record can't be identified with any given individual but information can still be inferred. The governing body behind the data sometimes has to make a decision about what is an acceptable level of anonymisation without completely destroying any utility or functionality behind it. There are some techniques being investigated through clustering of the data to help minimise information loss \cite{anon_cluster} but again, these only go so far. It should also be noted that k-anonymity can only work on table and record style data instead of things like images and so has its limitations there.
-
-
-\subsection{Secure Multi-Party Computation}
-A different approach for preserving privacy is when you have multiple parties all wanting to calculate something based on each others' data but no one wants to share their data. For this we have Secure Multi-Party Computation (MPC) and it is when 2 or more parties share their data with a 3rd trusted party and it carries out an algorithm that doesn't reveal anything about the parties' data that was given (unless the result of the function revealed the values anyway). \\ \\
-However this involves a trusted 3rd party and so a different style would be through something called Secret Sharing (SS) and will be explained through the BGW Protocol \cite{bgw}. This expresses the function that is computed as an arithmetic circuit containing addition and multiplication gates. It involves the parties splitting up their value into ``shares" and sending them off to the other parties. Each party then calculates the function on those shares, broadcasts the output as new shares before combining the shares it receives into a value. This is shown in Figure \ref{fig:bgw}.
-\begin{figure}[htbp]
-	\centering
-    \includegraphics[scale=0.3]{background/bgw.png}
-	\caption{BGW Protocol, courtesy of N. Dulay's Privacy Engineering Slides \cite{priv_eng}}
-	\label{fig:bgw}
-\end{figure}
+The data is still susceptible to homogeneity and semantic attacks [Table \ref{tbl:2-anon}] and while {l-Diversity} can fix the former there is never any guarantee that a dataset is 100\% completely and truly anonymised. With k-anonymisation, a specific data record can't be identified with any given individual but information can still be inferred. The governing body behind the data sometimes has to make a decision about what is an acceptable level of anonymisation without completely destroying any utility or functionality behind it. There are some techniques being investigated through clustering of the data to help minimise information loss \cite{anon_cluster} but again, these only go so far. It should also be noted that k-anonymity can only work on table and record style data, and will be limited in the case of images.
 
 
 \subsection{Differential Privacy}

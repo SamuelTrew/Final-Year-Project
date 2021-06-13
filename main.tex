@@ -3,12 +3,13 @@
 \setcounter{secnumdepth}{4}
 
 % some definitions for the title page
-\newcommand{\reporttitle}{Investigating Robust Aggregation in Federated Learning on Healthcare Data}
+\newcommand{\reporttitle}{Enhancing Robust Aggregation in Federated Learning}
 \newcommand{\reportauthor}{Samuel Trew}
-\newcommand{\supervisor}{Amir Alansary}
+\newcommand{\supervisor}{Dr. Amir Alansary}
 \newcommand{\secondmarker}{Dr. Jonathan Passerat-Palmbach}
 \newcommand{\reporttype}{MEng - Final Report}
-\newcommand{\degreetype}{MEng Computing - Computation in Biology and Medicine} 
+\newcommand{\degreetype}{MEng Computing} 
+\newcommand{\subdegreetype}{Computation in Biology and Medicine} 
 
 % load some definitions and default packages
 \input{includes}
@@ -29,28 +30,25 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
-We are in a time where a person's private data is becoming more and more valuable, with people being more protective of their data being shared with third parties. 
-Unfortunately, Machine Learning is an area that is very data heavy and to be able to provide the quality of software such as translation and predictive text that people have come to depend upon, yours and my data is needed.
+Federated Learning is a promising solution for distributed machine learning  that is able to operate without users parting ways with their data. This is done by aggregating models together to form a ``global model" that represents the sum of the users' contributions.
 \\ \\
-Going on beyond simple personal data that might be found on your favourite social media app, there are greater concerns for more highly sensitive data. 
-The main focus of this project is the application of machine learning to medical data.
-This area of data has its obvious concerns in protecting patients' privacy and has historically been very closed-off to people wanting to get access to medical records and datasets that hospitals and organisations might have.
+However, the lack of knowledge by the overarching system of what data an individual user possesses, opens this system up to vulnerabilities. Attackers can act maliciously, faulty users can damage their local model, and models are at risk of theft.
+
+So, ensuring that the aggregation strategy is robust, is of paramount importance.
+Unfortunately, current methods of robust aggregation lack full understanding of this space and so aren't able to fully protect the users from all of the variety of attacks present.
 \\ \\
-In this project we will be turning our heads to a field of Machine Learning called Federated Learning. 
-This has its roots in trying to off-load the machine learning aspect to the users' devices so that it never has to leave. Here I will cover implementation, attacks and their associated defences as well as ways to help improve the quality of the model that is being protected.
-\\ \\
-Malicious or faulty users can negatively impact the accuracy of the model and so our main aim is to focus on investigating and creating ways of negating this. 
-There are currently many different methods out there to achieve this and this project will be focusing on the major ones to provide an accurate evaluation of what is available to use and how they perform.
+This paper will cover various forms of robust aggregation, as well as some more simple methods to enhance current existing approaches.
+It will also introduce a solution to fully enhancing robust aggregation (from more attack vectors) called FedPADRC, which uses clustering and other techniques to enhance the robust aggregation process.
 \end{abstract}
 
 \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section*{Acknowledgements}
-I would like to thank Amir Alansary for helping me and guiding me through this project as well as giving me a reading group to discuss and broaden my horizons for Federated Learning.
+I would like to thank Amir Alansary for helping and guiding me through this project, as well as giving me a reading group to discuss and learn more about Federated Learning.
 \\ \\
-The notes, slides and general lecture material/teaching from modules such as Privacy Engineering and Intro to ML have proved to be invaluable in my general understanding of Machine Learning and Privacy Preserving techniques. So, I would like to thank the relevant lecturers for this.
+The notes, slides and general lecture material/teaching from modules such as Privacy Engineering and Introduction to Machine Learning have proved to be invaluable in my general understanding of Machine Learning and Privacy Preserving techniques. So, I would like to thank the relevant lecturers for this.
 \\ \\
-There are also my flatmates, who helped me make sure that what I wrote isn't illegible and incomprehensible, as if it was written by an enthusiastic child telling a story.
+There are also my flatmates, who helped try and make sure that what I wrote isn't illegible and incomprehensible, as if it was written by an enthusiastic child telling a story.
 \\ \\
 I would also like to thank my family for supporting me through my entire education and being the reason that it has all culminated with me sitting here writing this today.
 \\ \\
@@ -64,10 +62,6 @@ Finally, I would like to thank my girlfriend for putting up with me and the lack
 %--- table of contents
 \fancyhead[RE,LO]{\sffamily {Table of Contents}}
 \tableofcontents 
-
-\listoffigures
-
-\listoftables
 
 
 \clearpage{\pagestyle{empty}}
@@ -93,8 +87,12 @@ Finally, I would like to thank my girlfriend for putting up with me and the lack
 \input{free_riders/free_riders}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Personalised \& Adaptive Dimension Reducing Clustering Aggregation - FedPADRC}
+\chapter[FedPADRC]{Personalised \& Adaptive Dimension Reducing Clustering Aggregation}
 \input{my_agg/mine}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Conclusion}
+\input{conclusion}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Ethical Issues}

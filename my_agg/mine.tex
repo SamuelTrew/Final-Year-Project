@@ -1,6 +1,16 @@
 Throughout all of the various aggregation methods covered with and without experimentation, trying to find good ideas and sensible applications of them has been an end goal.
 Ultimately, none of the robust aggregators have performed as well as I would have liked on the higher numbers of malicious clients and tend to have reduced accuracy if anything.
 This lead me down the path of trying to use ideas from current aggregators and methods in federated learning to try to improve on the SotA.
+\\ \\
+My goals for creating a better robust aggregator are:
+\begin{itemize}
+    \item Better understand the robust aggregator space in federated learning.
+    \item Enhance current aggregation methods through clustering.
+    \item Handle more malicious clients than any other robust aggregator.
+    \item Be able to handle free-riders better than other aggregators.
+\end{itemize}
+Throughout all that I wish to include in the aggregator, I name it FedPADRC (Personalised and Adaptive Dimension Reducing Clustering).
+
 
 \section{Clustering}
 Initially, I thought about clustering similar models together through K-Means Clustering.
@@ -146,23 +156,250 @@ Instead, we end up seeing that a dimension value of 1 looks to be a pretty safe 
 
 \subsection{Low Dimensional Beings}
 As has become apparent, relying on traditional methods to guarantee what the optimal values are, is not always the best idea.
-So, to help further guarantee that the low PCA dimension values are correct, let's plot the coordinates of these values and see how they compare.
+So, to help further guarantee that the low PCA dimension values are correct, let's plot the coordinates of the PCA transforms of these values and see how they compare.
 We can only do this in 1D, 2D, 3D and 4D but seeing as it theoretically shouldn't need to go beyond this anyway, it should be fine.
+It should be noted that the 4th dimensions is represented by size of the plotted points in the graphs.
 \\ \\
-
-
+With no attacks you get pretty much what you would expect [\ref{fig:0mal_dims}] and all 4 dimensions show to add some level of useful information.
+When we start adding attacks, we would expect that the most information gain happens from 1D and that is pretty much what you get at an initial glance.
+\begin{figure}[htbp]
+	\centering
+    \includegraphics[scale=0.33]{my_agg/graphs/5mal_dims.png}
+	\caption{PCA Transform Positions over Four Dimensions - 5 Malicious}
+	\label{fig:5mal_dims}
+\end{figure}
+As shown in Figures \ref{fig:5mal_dims}, \ref{fig:20mal_dims}, we see that the remaining 3 dimensions all have the malicious clients placed in the middle of the same region [\ref{fig:4d_diff}] in their respective dimensions.
+However, what becomes important is the scattering of the benign clients.
+In all other dimensions they are far more unique, which lends them to not be clustered with the malicious clients even if the first dimension were to fail at separating the 2 groups.
+This is also seen in practice, where the accuracy of 1D solutions tends to end up including more malicious clients as time goes on, showing that the segmentation isn't working as well as the Explained Variance would have you believe.
+\\ \\
+This is most likely due to the global aggregation sharing the global model out to every client, softening the malicious clients and making them appear more benign in the process.
+This causes their PCA transform values to spread out more, increasing the likelihood that more clusters will be assigned to them.
+This \textit{can} be mitigated through increasing the number of epochs per round (that's why 10 is used instead of 2) but it isn't a perfect solution.
+We are currently able to fix this through using 4 dimensions for the PCA but there is obviously something about 1D PCA that seems so tempting.
+\\ \\
+Increasing the number of dimensions doesn't really fix this and at higher dimensions (e.g. 10 [\ref{fig:dim10_26mal}] or 29 [\ref{fig:dim29_26mal}]) we still some spiking at later federated rounds.
+The error rate is also not as smooth and is more susceptible to be jagged throughout, indicating that the current algorithm isn't as robust.
 
 
 
 \section{Personalisation}
+We nicely fall in the lap of federated learning personalisation.
+We have hypothesised that the 1D PCA option might not be working as well simply because the malicious clients are getting good updates that makes them appear more benign over the course of the federated rounds.
+This can be seen in Figure \ref{fig:mal_spread} as the spread is more segmented in 2D while in 4D there is only 1 dimension of spread that is much less segmented
+So ideally, we don't want to give any malicious client a global update that will inevitably work against the benign clients.
+\begin{figure}[htbp]
+	\centering
+    \includegraphics[scale=0.2]{my_agg/graphs/mal_spread.png}
+	\caption{PCA Transform Position Spread for 2D (top) \& 4D (bottom) in Rounds 0, 1, 2}
+	\label{fig:mal_spread}
+\end{figure}
+\\ \\
+This is where the idea of personalisation comes in.
+We either don't want to update certain clients or simply update them with less useful information that is specific to them.
+This also gives us the capability to not have to use COMED to do the robust aggregation as we would already be robustly aggregating in the first place.
+However, it may end up being more beneficial to also use COMED on top of this.
+
+
+
+\subsection{Methods of Personalisation}
+There are 4 main ways that I have come up with to achieve this, with the names that I will be using to refer to them as in the brackets:
+\begin{enumerate}
+    \item Selective Update (selective): this method involves only updating a select number of the clients at each round. This number would be determined by the floor of half of the number of clusters + 1. E.g. 3 for 5 clusters, 4 for 7, 5 for 9, etc. (we will assume 3 for K=5 from here on out).
+    This would then hopefully lead to the malicious cluster not being updated (along with a benign one potentially) and the other clients in the selected clusters get an aggregated model of the top 3 clusters.
+    \\ \\
+    This would end up causing the main 3 clusters to get updated with data from each other, ultimately having them remain more similar and therefore more likely to update again together in later rounds.
+    This would then help reduce the benign poisoning that is given to the malicious clients to help them.
+    
+    \item Concentrated and General Updates (general): here, we do 2 different global model updates.
+    One is concentrated model of the top 3 best clients (as described above) and the other is a more general model from the aggregation of all of the clusters.
+    Instead of just sending the concentrated model out to the best clients, it then gives the left-out benign cluster an opportunity to contribute to the other benign clusters later on, while still hopefully keeping the top 3 best clusters away from the malicious cluster.
+    \\ \\
+    This might not work as well, as the malicious client is still getting updated.
+    There is also the possibility of then causing the best clusters to become too similar such that they merge and give a higher likelihood for the malicious clients to form more than one cluster.
+    It will almost definitely cause the non-best benign cluster to then get polluted with damage from the malicious cluster as it will have received the general update which will include the malicious cluster in the aggregation.
+    
+    \item Thresholding (thresholding): instead of just using the best 3 out of 5, instead we figure out which clusters are more than a set number of StDs away from the mean and then set their weighting to 0.
+    This allows us to then aggregate on the rest of the data with their own personal weighting so that in theory, you get to fully aggregate on all of the benign clients' data, instead of just some of it.
+    \\ \\
+    This could also be applied in conjunction with the previous method such that the general model could then be aggregated on all non-0 weighting clusters while the concentrated model is still formed.
+    You then also have the option to not update the 0-weight cluster at all like in the first method.
+    
+    \item No Global Model (no global): if we were to just not aggregate the clusters' models together, then in theory each client would get a more personalised model that was best suited to them.
+    It would also keep all of the malicious clients building their own malicious model while all of the benign clients build their own separate ones.
+    This would help minimise any form of cross-over between the clusters but it wouldn't allow for as much model generalisation.
+    Depending on each client's end goal, this might not be an issue at all.
+\end{enumerate}
+
+Each method has its own strengths and weaknesses.
+Although they can be used independently, it might be more beneficial to use some combination of them (as outlined in the Thresholding method) or to simply use just one sole method (like with the no global model option).
+
+
+\subsection{Adaptive Weighting of Clusters}
+To decide which clusters are deemed the ``best" and what weighting each cluster is given, there are 2 main scoring metrics for doing so.
+One is in the form of Cosine Similarity and the other is a simple sum of squared differences between the parameter weights.
+Seeing as the magnitude of the values in our data (the model parameters) matters, Cosine similarity might not be the best option as this isn't taken into account.
+However, graphs of the PCA transform data do tend to put the benign clients' values on a similar angle to each other and so it may still be a suitable metric.
+\\ \\
+To do either of these methods, you need to have a starting point as a point of reference to do the calculations from.
+So, for every cluster, I calculate the scoring metric relative to that cluster so that I end up with a 2D 5x5 grid of values.
+To find the ``best" clusters, I proceed to then take the best 3 scores from each list and sum them together.
+Which ever the max value is, I take the according list of values, normalise them, and then use those for the weights.
+This leaves me with a set of weights where I have the 3 ``best" clusters being the closest/most similar options.
+After this has taken place, I can then follow through the rest of the algorithm according to which method of personalisation I choose.
+The pseudocode to this is outlined in Algorithm \ref{alg:my_alg}.
+\\ \\
+This weighting algorithm is used in all of the first three methods and is crucial in deciding the best models to choose from.
+One part on Line 36 should be noted as maybe not being a solution that should be incorporated every time.
+In the instance where a malicious cluster is being used in aggregation when it shouldn't be, where there are a lot of malicious clients, this weighting could cause much more drastic effects than without it.
+\\ \\
+\begin{algorithm}[H]
+\SetAlgoLined
+\DontPrintSemicolon
+\SetKw{KwIn}{in}
+\SetKw{KwMath}{maths}
+\newcommand\mycommfont[1]{\footnotesize\ttfamily\textcolor{blue}{#1}}
+\SetCommentSty{mycommfont}
+ import \KwMath\;
+ \;
+ \tcc{Some initial starting values}
+ cluster\_count = 5\;
+ num\_to\_take = \KwMath.floor(cluster\_count / 2) + 1\;
+ cluster\_weights = generate\_weights(self.cluster\_centres)\;
+ distances = [[] for \_ in range(cluster\_count)]\;
+ \;
+ \tcc{Calculating the distance between each cluster centre and every other cluster}
+ \For{i, m1 \KwIn enumerate(cluster\_weights)} {
+  \For{j, m2 \KwIn enumerate(cluster\_weights)} {
+   d = (m1 - m2).square().sum()\;
+   distances[i].append(d)\;
+  }
+ }
+ \;
+ best\_dist = \KwMath.infinity()\;
+ best\_indices = []\;
+ best\_i = -1\;
+ \;
+ \tcc{Calculating the best cluster centre that should be used for distance choice}
+ \For{i, dist \KwIn enumerate(distances)} {
+  indices = n\_smallest(num\_to\_take, dist)\;
+  total\_dist = sum(dist[i] \textbf{for} i \KwIn indices)\;
+  \;
+  \If{total\_dist $<$ best\_dist}{
+   best\_dist = total\_dist\;
+   best\_indices = indices\;
+   best\_i = i
+  }
+ }
+ \;
+ \tcc{Calculating weigths to use for each cluster}
+ weights = [w / sum(dists[best\_i]) \textbf{for} w \KwIn dists[best\_i]]\;
+ weights = 1 - weights\;
+ weights /= weights.sum()\;
+ \;
+ std = \KwMath.std(weights)\;
+ mean = \KwMath.mean(weights)\;
+ cutoff = mean - std\;
+ \;
+ best\_models = [self.cluster\_centres[i] \textbf{for} i \KwIn best\_indices]\;
+ weights[weights $<$ cutoff] = 0\;
+ \tcc{Resizing weights so that bigger clusters get a more proportionate weight}
+ weights *= size\_of\_each\_cluster\;
+ weights /= weights.sum()\;
+ \;
+ \textbf{return} best\_models, weights, best\_indices\;
+
+ \caption{FedPADRC Exterior Aggregators' Clustering Weight Calculation}
+ \label{alg:my_alg}
+\end{algorithm}
 
 
 
 
+\section{Evaluation}
+Looking back at the goals of what I wanted to achieve, it has so far become apparent that I have been able to do them all with the current exception of detection of free-riders.
+Hopefully looking at how the various forms of personalisation perform, this goal shall also be met.
+\\ \\
+To recap, I also wanted to achieve better aggregation through personalisation for 1D PCA as well as in general and so I will be initially testing that.
+I tested selective, general, selective with thresholding, general with thresholding and no global as forms of personalisation.
+\\ \\
+To also recap on what each
+
+\subsection{4D Personalisation}
+I made sure to try with 4D PCA first, so as to make sure that I wasn't going to be losing any performance with the discussed methods.
+There was also the need to test both COMED and FedAvg at both levels of aggregation, as this would hopefully lead to being able to not need COMED to do the robust aggregation and then hopefully purely relying on personalisation techniques.
+This would enable greater generalisation capabilities that would hopefully allow more non-IID data to be aggregated better.
+\\ \\ 
+With COMED, we saw typically really good performance with the clients only starting to fail with use of the general method under 24 malicious clients [\ref{fig:4d_24mal}].
+With FedAvg, we see the same level of performance with the selective methods but under general, the no thresholding method fails pretty quickly at 5 malicious clients [\ref{fig:4d_5mal}] while the thresholding method fails at around 15 [\ref{fig:4d_15mal}].
+This makes me realise that the general method is one that just doesn't perform to the same standard as without personaliation.
+\\ \\
+This is most likely because with general, we are still updating the malicious clients with a model, even if it is not as good as the selective model.
+It can also cause the benign client that isn't participating in the selective update to become more similar to that of the malicious clients, causing there to be increased chances of leakage.
+This is even without the fact that with no thresholding, you are then still just aggregating with the malicious clients at every step, and so nothing too robust is even happening.
+Therefore, proceeding with the general method for 1D would be futile and so won't be considered further.
+
+\subsection{1D Personalisation}
+Once I removed the generalisation from the testing, with both COMED and AFA I got pretty much the same results across the board.
+Through all levels of malicious clients, with and without thresholding, the selective method held up throughout [\ref{fig:1d_26mal}].
+This was great to see as this was a great win in terms of being able to use FedAvg for the aggregation instead of COMED, allowing greater data use.
+\\ \\
+This helps definitively prove that personalisation helps with the robustness of the algorithm and as such, should be treated as an essential part of the process.
 
 
-\section{Bringing it All Together}
+\subsection{No Global}
+As much as has been shown that the selective method works well, what if there were more than 1 attack or more than 1 type of attack present?
+In this case, it may end up being the case that you don't want to do any aggregation amongst the clusters at all for the fear of being damaged from too many angles.
+\\ \\
+This is where the no global method shines.
+It is essentially a more strict version of the selective algorithm in that there is only aggregation taking place within each cluster and not between the clusters themselves.
+This allows for each cluster to independently perform without the worry of other clusters affecting its performance.
+\\ \\
+This works well in either 4D or 1D PCA with the sole difference being that at 26 malicious clients there are temporarily 2 clusters that contain malicious clients before eventually all of the malicious clients form into 1 cluster.
+This is shown in Figure \ref{fig:1D_no_global} where each line represents a different cluster.
+\begin{figure}[htbp]
+	\centering
+    \includegraphics[scale=0.5]{my_agg/graphs/1d_no_global.png}
+    \caption{1D PCA with the No Global Personalisation Method - 26 Malicious Clients}
+	\label{fig:1D_no_global}
+\end{figure}
+The great thing about this is that this works at any level of malicious clients [\ref{fig:4D_no_global_1}] with the only noticeable difference being the random spikes that are caused because the labels assigned to clusters change.
+It should be noted as well that the malicious clusters only ever contained malicious clients and the benign clusters only ever contained benign clients.
+As such, there was no overlap or poisoning at all, not even by a single client.
 
-
-
+\subsection{Free-Riders}
+The final step in achieving all that was set out to do is to help conquer the free-riders.
+The 2 options that are present are the no global method and the selective method.
+\\ \\
+For no global, the hope is that all of the free-riders will group together into their own cluster (due to their similarity) and will then not receive any contributions from proper clients.
+Or at the very least, not get a properly converged model.
+This might be harder due to the nature of the free-riders, and a few benign clients might be lost in the process if they get caught up in the same cluster as the free-riders.
+\\ \\
+For the selective method, it might be harder but the goal is to have the free-riders be in one of the 2 left-out clusters.
+This allows for some leniency hopefully but at the same time there is more risk associated with that there is an increased chance of them stealing a good model if they are included in the selected group.
+Either way, seeing how FedPADRC handles free-riders by itself as well as with malicious clients is what I shall test.
+\\ \\
+The no global method is the first testing point as if it can't work here, then it won't be able to handle the more lenient selective method.
+I am also doing the testing with 4D PCA just to make sure that it isn't that causing any potential problems.
+\\ \\
+What ends up occurring is something quite magical and yet so obvious!
+The free-riders get the same global model that is sent out at the very start of the process but they can't really make any realistic changes to it.
+Therefore, every other client (whether or not it is malicious) will do some form of learning.
+This then has a great distinctive effect of having the free-riders all look the same [\ref{fig:10mal10free_rep}] \textit{as well as} not being similar in any shape or form to the rest of the clients.
+As such, it never even gets the opportunity to learn even a little bit, meaning that the free-riders fail in their goal [\ref{fig:no_15free}] as well as there being no intellectual property theft.
+What's also good is that there wasn't even 1 free-rider that managed to sneak into the other clusters at any count of free-riders, they remained separate at all times.
+\\ \\
+It might end up being the case that FedPADRC isn't able to handle more than just one style of attack at any given time.
+Alas, that is not the case!
+Even when there is a combination of free-riders and malicious clients present [\ref{fig:no_13free_13mal}], it is not hindered in any-way-shape-or-form.
+All that then happens is that there are 2 clusters that have awful performance with the 3 benign clusters making up all of the remaining benign clients.
+\begin{figure}[htbp]
+	\centering
+    \includegraphics[scale=0.5]{my_agg/graphs/no_global_13free_13mal.png}
+    \caption{4D PCA with the No Global Personalisation Method - 13 Free and 13 Malicious Clients. This shows that even under a combination attack, FedPADRC is able to hold its own.}
+	\label{fig:no_13free_13mal}
+\end{figure}
+\\ \\
+All of the above results are also emulated with the selective personalisation method.
+This allows for the configurator of the federated system to be a bit more strict or lenient with the aggregation setup, allowing more variability for ensuring the robustness of the aggregation.
 

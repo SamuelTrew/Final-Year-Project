@@ -5,20 +5,20 @@ When it comes to non-robust strategies, the typical focus is on trying to make t
 
 \subsection{FedSGD}
 FedSGD is based on the idea that you would sample the gradients of the model from each client and then have them all averaged proportionally based on the number of samples of each client.
-The update strategy is very simple as it is just SGD but I will outline the formula for clarity:
+The update strategy is simply that of SGD:
 \begin{equation}
     \omega_j = \omega_j - \alpha \dfrac{\delta E_i}{\delta \omega_j}
 \end{equation}
 Where E is the error function (typically $L^2$ norm or cross-entropy) and w is the parameter that's being updated.
 \\ \\
-It also sometimes involves selective parameter update where only a certain number of the parameters are chosen each round.
+It sometimes also involves a selective parameter update, where only a certain number of the parameters are chosen each round.
 This can be done at random but a smarter way is to use the models that have the largest gradient change and so in theory will contribute the most to the global model.
 
 
 \subsection{FedAvg}
 FedAvg was made to improve on FedSGD by instead focusing on the model weights instead of the model gradients \cite[section 2.1]{robagg_health}.
-This has been shown to be an improvement on using the gradients and is typically what is used for other forms of aggregation today.
-The formula for it is described here:
+This has been shown to be an improvement on using the gradients and is typically used in other modern aggregation tasks.
+It can be described through the formula:
 \begin{equation}
     \theta_g = \mathlarger{\mathlarger{\sum}}_{i=0}^{\infty} \dfrac{d_i}{d} \theta_i
 \end{equation}
@@ -38,11 +38,11 @@ Experiments show \cite{fedma} that FedMA is capable of out-performing all other 
 
 
 \subsection{Auto-FedAvg}
-Auto-FedAvg \cite{autofa} was born out of the need to be able to handle non-iid data as well as just in general achieve a greater accuracy.
-The main concept behind it is that instead of having the weights for the weighted-averaging of the aggregation be fixed, they become learnable parameters that can adapt as the aggregation rounds occur.
+Auto-FedAvg \cite{autofa} was born out of the need to handle non-iid data, whilst still improving overall accuracy.
+Instead of having the weights for the weighted-averaging of the aggregation be fixed, they become learnable parameters that can adapt as the aggregation rounds occur.
 \\ \\
-In this algorithm there are 2 sets of weights: $\alpha$ and $\beta$.
-$\alpha$ contains the set of learnable weights that the central server uses for aggregation and $\beta$ is what $\alpha$ is parametised by during the learning process through an activation function $\gamma$.
+In this algorithm there are two sets of weights: $\alpha$ and $\beta$.
+$\alpha$ contains the set of learnable weights that the central server uses for aggregation and $\beta$ is what $\alpha$ is parameterised by during the learning process through an activation function $\gamma$.
 In this case $\gamma$ can either be the Softmax function or a Dirichlet distribution where $\alpha$ is the set of random variables with concentration $\beta$. 
 Dirichlet is as follows:
 \begin{equation}
@@ -54,4 +54,4 @@ Each round, the clients sample a mini-batch of their data and compute the $\alph
 The loss of the $\beta$ weights is then calculated with regards to the mini-batched data before $\beta$ is subsequently updated with $\gamma$.
 The server then gathers up each $\beta$ weights from each client's local loss calculation and they are averaged to form the $\beta$ for the next round that is used to calculate the $\alpha$.
 \\ \\
-\textit{N.B. the paper relating to this method \cite{autofa} was released in April of 2021 and is still under development. As such, the methodology and implementation is still up to change as well as their experimentation results. In this area, it claims to be SotA and actively claims that it is better than FedMA in similar tasks but this hasn't been peer-reviewed as of yet.}
+\textit{N.B. the paper relating to this method \cite{autofa} was released in April of 2021 and is still under development. As such, the methodology and implementation is still up to change as well as their experimentation results. In this area, it claims to be SotA and that it is better than FedMA in similar tasks, but this hasn't been peer-reviewed as of writing.}

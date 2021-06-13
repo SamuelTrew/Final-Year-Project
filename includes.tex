@@ -37,6 +37,7 @@
 \usepackage[table]{xcolor} % cell colouring
 \usepackage{pgfplots} % graphs
 \usepackage[nottoc,numbib]{tocbibind} % Includes Figures, Tables and Bibliography in table of contents
+\usepackage[ruled,vlined,linesnumbered,noend]{algorithm2e} % For including algorithms
 
 \hypersetup{pdftitle={},
   pdfsubject={}, 
@@ -94,38 +95,24 @@
 \captionsetup{margin=10pt,font=small,labelfont=bf}
 
 
-%--- chapter heading
-
+\makeatletter
 \def\@makechapterhead#1{%
-  \vspace*{10\p@}%
-  {\parindent \z@ \raggedright \sffamily
+  {\parindent \z@ \raggedright \normalfont
+    \ifnum \c@secnumdepth >\m@ne
+        \huge\bfseries \@chapapp\space \thechapter
+        \par\nobreak
+        \vskip 15\p@
+    \fi
     \interlinepenalty\@M
-    \Huge\bfseries \thechapter \space\space #1\par\nobreak
+    \Huge \bfseries #1\par\nobreak
     \vskip 30\p@
   }}
-
-%--- chapter heading
-
-\def\@makechapterhead#1{%
-  \vspace*{10\p@}%
-  {\parindent \z@ \raggedright \sffamily
-        %{\Large \MakeUppercase{\@chapapp} \space \thechapter}
-        %\\
-        %\hrulefill
-        %\par\nobreak
-        %\vskip 10\p@
-    \interlinepenalty\@M
-    \Huge\bfseries \thechapter \space\space #1\par\nobreak
-    \vskip 30\p@
-  }}
-
-%---chapter heading for \chapter*  
 \def\@makeschapterhead#1{%
-  \vspace*{10\p@}%
   {\parindent \z@ \raggedright
-    \sffamily
+    \normalfont
     \interlinepenalty\@M
     \Huge \bfseries  #1\par\nobreak
     \vskip 30\p@
-  }}	
+  }}
+\makeatother
 \allowdisplaybreaks

@@ -1,48 +1,62 @@
 \section{Motivation}
-The use of Machine Learning (ML) to enhance user experiences, to provide fantastic tools such as language translations, or to be able to make accurate predictions all require large amounts of data --- this is normally collected by a single body/organisation. This has its limitations; there are cases where not enough data is collected by any one group of people. An example of this is with medical data.
+The use of Machine Learning (ML) to enhance user experiences, to provide fantastic tools, or to be able to make accurate predictions all require large amounts of data --- this is normally collected by a single body/organisation.
+This has its limitations; there are cases where not enough data can be collected by any one group of people. 
+An example of this is with medical data.
 \\ \\
-Medical data is typically well-protected, with many regulations in place to prevent its misuse \cite{nhs_digital_data}.  This is due to the sensitive nature of the data, that pertains to an individual's state of health and other private information. Directly exposing such information to researchers is undesirable. While these protections (in the form of legislation such as the General Data Protection Regulation (GDPR) \cite{gdpr} or Health Insurance Portability and Accountability Act (HIPAA) \cite{hipaa}) are beneficial to user confidentiality, this poses a problem to researchers. This limits their ability to apply data-intensive ML procedures in the medical sector.\\
+Medical data is typically well-protected, with many regulations in place to prevent its misuse \cite{nhs_digital_data}.  
+This is due to the sensitive nature of the data, that pertains to an individual's state of health and other private information.
+Directly exposing such information to researchers is undesirable. 
+While these protections (in the form of legislation such as the General Data Protection Regulation (GDPR) \cite{gdpr} or Health Insurance Portability and Accountability Act (HIPAA) \cite{hipaa}) are beneficial to user confidentiality, this poses a problem to researchers. 
+This limits their ability to apply data-intensive ML procedures in the medical sector.\\
 
-Typical methods of training ML models would not work as the personal data should not leave the hospitals or the devices of the users, this is where Federated Learning (FL) \cite{federated_comic} comes in. This is where each client involved in the procedure trains an agreed upon model on their own data. Instead of sharing the data with anyone else, they now share the model they trained with a central server. This server then combines all of the models from all of the clients together to form one unified model. This is then distributed back out to the clients and the model is further trained on the data. The process is repeated until the model converges.\\ \\
-However, this style of collaborative learning can be exploited by malicious or faulty clients sending bad updates to the server, interfering with the global model. There are already several methods for defending this to allow robust aggregation but with the varying styles and complexities of current attacks they can be shown to not be good enough for this.\\ \\
-To help ensure that the user information remains private, data privacy methods such as Differential Privacy (DP) and k-anonymity and their affects on FL will also be explored. These privacy preserving mechanisms can end up also affecting robust aggregation methods. The performance of these methods under the new privacy constraints will also be evaluated.
+Typical methods of training ML models would not work as the personal data should not leave the hospitals or the devices of the users. 
+This is where Federated Learning (FL) \cite{federated_comic} comes in. 
+FL is where each client involved in the procedure trains an agreed upon model on their own data. 
+Instead of sharing the data with anyone else, they now share the model they trained with a central server. 
+This server then combines all of the models from all of the clients together to form one unified model. 
+This is then distributed back out to the clients and the model is further trained on the data. 
+The process is repeated until the model converges.
+\\ \\
+However, this style of collaborative learning can be exploited by malicious or faulty clients \textbf{sending bad updates} to the server, interfering with the global model. 
+There are already several methods for defending this to allow robust aggregation, but with the varying styles and complexities of current attacks, they can be shown to be insufficient.
+\\ \\
+There is also the case of clients trying to \textbf{steal the model} without contributing and this kind of unique attack poses to be a formidable foe against current aggregators.
+Investigating, enhancing and creating a robust aggregator to be able to handle all of these attacks is a tricky problem, but one that will be detailed throughout this report.
 
 
 \section{Objectives}
-The main focus of this project is to implement and evaluate robust aggregation methods for privacy preserving FL (such as Differential Privacy).
-This is very much a specific domain that we're covering. 
-The MedMNIST dataset provides an ideal range of data scale and tasks, 
-However, it is limited to the field of image classification and so attacks are limited as such.
+The main focus of this project is to implement and evaluate robust aggregation methods for FL.
+In our work, we will be using well-known datasets such as MNIST, that are good for covering the variety of attacks we are considering.
+However, other forms of ML (e.g. LSTMs) might be susceptible to different types of attacks and it should be noted that these won't be covered.
 \\ \\
-My initial experiments will be done using MNIST \cite{mnist} digit classification as a baseline for initial investigation.
-This is so that I can form a better picture as to how each of the robust aggregation algorithms currently perform in practice on datasets that they have commonly been trained on.
+The initial experiments will be done using MNIST \cite{mnist} digit classification, as it serves a good baseline for initial investigation.  This is to gauge the performance of the robust aggregation algorithms when applied to such common datasets.
+Then, we will conduct an evaluation of the different strategies, and determine the driving characteristics behind their performance. This will provide insight into what helps tackle the issues faced by FL.
 \\ \\
-Then I can work my way into using MedMNIST datasets \cite{medmnist} (image classification). 
-This is to allow for greater focus on the medical imaging field and apply what I've learned by then to it.
-When it comes to managing medical data, making incorrect predictions can lead to poor or even disastrous medical decisions/outcomes.
-So trying to make sure that the aggregation methods used are robust enough is essential to Federated Learning getting properly used in the medical field.
+We will then lead into creating our own robust aggregation strategy, one that is more capable of handling a large variety and combinations of attacks in a robust manner.
+The aim would be to end up with a State of the Art (SotA) algorithm that outperforms the other solutions.
 \\ \\
-The performance of these methods under the new privacy constraints will also be evaluated.
-This is important as these methods can enhance the robustness of the models but may also degrade performance depending on the attacks being carried out and the robust aggregation used.
-I will also be investigating into the amount of privacy budget applied, as there are trade-offs between privacy and performance and for any given dataset, these need to be investigated.
-\\ \\
-Moreover, I will be developing my own robust aggregation method that will either be based on existing methods or will be through a novel approach.
-With this I will be undertaking ample experimenting and evaluating of how my aggregation performs compared to state of the art (SotA) methods as well as newer ones.
+In the future, we would like to be able to do some further investigation into the medical realm. This is to evaluate the performance of our aggregator on a real-world dataset.
+This might be harder to achieve in practice due to the sensitive nature of the data. A competition dataset that is publicly available might prove to be the better option.
 
 
 
 
 \section{Challenges}
 \begin{enumerate}
-    \item \textbf{Tuning hyper-parameters:} The robust aggregation methods all have their own set of unique hyper-parameters that can be fine-tuned greatly.
-    This makes it hard to be able to get definitively good results as it adds complexity to the running of experiments.
+    \item \textbf{Tuning hyper-parameters:} 
+    The robust aggregation methods all have their own set of unique hyper-parameters that need fine-tuning. This adds to the complexity of running our experiments, as it is difficult to obtain a definitive, optimal parameterisation of each method.
         
-    \item \textbf{Type of attacks:} Identifying viable and representative real-world attacks could prove complicated. There are a wide range of attacks and so there might not be time to do full-on testing of many different attacks/combination of attacks. Instead, this project will focus on same of the more popular attacks.
+    \item \textbf{Type of attacks:} 
+    Identifying viable and representative real-world attacks could prove complicated. 
+    There are a wide range of attacks and so there might not be time to do full-scale testing on all of them.
+    Instead, this project will focus on some on the current attack strategies to a deeper, and not broader, extent.
 
-    \item \textbf{Number of configurations:}  Every possible attack, variations in the structure of the attack, and variation in the number of clients requires a complete re-training and testing of the model. This is hugely time consuming and can limit development speed if not planned well (e.g. running a number of experiments everyday overnight).
+    \item \textbf{Number of configurations:}  
+    Every possible attack, variations in the structure of the attack, and variation in the number of clients requires a complete re-training and testing of the model. 
+    This is hugely time consuming if not planned well, given the limited duration of this project.
     
     \item \textbf{Computational resources:}
-    Due to the Machine Learning and distributed nature of this project, this project is quite resource intensive. 
+    The Machine Learning and distributed nature of this project makes it resource intensive. 
     Increasing the number of users that we test with or having a more complex Deep Learning network all contributes to this.
-    Having a more powerful system at my disposal would help make it more feasible to get more done in the same time-frame.
+    Having a more powerful system at my disposal would help make it more feasible to get more done in this time-frame.
 \end{enumerate}

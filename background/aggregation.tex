@@ -1,23 +1,27 @@
-Evidently, having a raw aggregation method is suspect to a variety of potential attacks from any number of malicious users. In some cases it might not take more than one client to have the model predict inaccurately. So, unfortunately for FedSGD and FedAvg, we have to look elsewhere for a more robust aggregation strategy. This can typically involve not including the malicious clients in the aggregation, giving the malicious clients a lower weighting in the aggregation and/or just flat-out blocking the clients once a certain threshold is met. \\ \\
+Unfortunately, having a raw aggregation method is suspect to a variety of potential attacks from any number of malicious users. 
+In some cases, it might take a single client to have the model predict inaccurately. 
+As such, we have to look outside non-robust aggregation methods like FedSGD and FedAvg. 
+This can typically involve not including the malicious clients in the aggregation, giving the malicious clients a lower weighting in the aggregation and/or just completely blocking the clients once a certain threshold is met. 
+\\ \\
 Any of these methods have their cons in that it is possible in all cases to end up blocking at least one of the benign clients as well. 
 When the number of clients is small this can have a much more detrimental affect due to a significant chunk of the training data is lost. 
 Increasing the number of clients would mitigate the effect of this but there is still an issue of have the benign clients' data lost. 
 A couple of different methods for robust aggregation will be introduced along with their performance under different styles of attacks.
 
 \subsection{Krum}
-To tolerate f byzantine clients (malicious/faulty) out of a total of n clients, Krum \cite{krum} achieves its byzantine-resilience property by looking at every subset of $n-f-1$ clients. 
+To tolerate $f$ byzantine clients (malicious/faulty) out of a total of $n$ clients, Krum \cite{krum} achieves its byzantine-resilience property by looking at every subset of $n-f-1$ clients. 
 It goes through each client and calculates the sum of the squared-distances between the client and their closest $n-f-2$ neighbours.
 This becomes the score of that client and Krum takes the client with the best score and uses a data sample from that client.
 With this method, Krum is able to theoretically tolerate up to f byzantine clients under the condition of $2f + 2 < n$. 
 \\ \\
 Another development on Krum brings in the idea of averaging to it, called Multi-Krum (MKRUM).
-You take the top $n-f$ clients' parameter vectors and average them together so as to be able to better leverage multiple correct (or at least correct by KRUM standards) clients.
+You take the top scoring $n-f$ clients' parameter vectors and average them together so as to be able to better leverage multiple correct (or at least correct by KRUM standards) clients.
 This helps to reduce waste and not to throw away data. However, MKRUM still (and even more so Krum) throws away a lot of clients' data that might be useful. It also takes on a position where $f$ might not be chosen correctly, leading to even more data unnecessarily being thrown away.
 
 \subsection{Coordinate-wise Median}
 A simpler approach to choosing an individual client's parameters is through Coordinate-wise Median (COMED) \cite{comed}.
 For all parameter vectors from all of the clients, COMED takes the median value of each of the parameters throughout all of the models.
-This is defined mathematically as
+This is defined mathematically as:
 \begin{equation}
     g_k = med\{x_k^i: i \in [m]\}
 \end{equation}
@@ -26,8 +30,10 @@ This very nicely gets to utilise all of the clients to try to have as balanced o
 It also performs quite well, generally better than MKRUM in an adversarial test while being a bit more sensitive to noise without any bad clients involved \cite{robagg_health}.
 
 \subsection{Adaptive Federated Averaging}
-A different way to handle byzantine clients is to simply block them and that is precisely what Adaptive Federated Averaging (AFA) \cite{afa} does.
-It determines if a client is malicious based on the cosine similarity ($s_k$) between the model updates from the clients and the global aggregated model's parameters. \\ \\
+A different way to handle byzantine clients is to simply block them, as done by Adaptive Federated Averaging (AFA) \cite{afa}.
+It determines if a client is malicious based on the cosine similarity ($s_k$) between the model updates from the clients and the global aggregated model's parameters.
+With this it also adaptively assigns weights to the clients for aggregation.
+\\ \\
 Assuming that the number of byzantine clients is less than half of the total clients, we use the median ($\hat{\mu}_s$), mean ($\bar{\mu}_s$) and standard deviation ($\sigma_s$) of the similarities of the clients. AFA works as $\hat{\mu}_s$ must be one of the good values due to the the number of byzantine clients being less than half. We then make two comparisons for determining if a client is bad:
 \begin{equation}
     \begin{cases}
@@ -42,12 +48,14 @@ This strategy for robust aggregation is also shown to consistently outperform pr
 \subsection{FedMGDA+}
 Another method involving the blocking of clients is FedMGDA+ \cite{fedmgda}. 
 This takes a subset of clients and for each one, performs a client update.
-This involves a single layer NN that aims to minimise the loss and for each client, the new weights formed are returned as a difference to the global model weights.
+This involves a single layer NN that aims to minimise the loss.
+For each client, the input to the NN is the difference between the client's model and the global model.
+The new weights for the clients are then returned and used for aggregation.
 The central server then aims to learn the relevance of each client based on the importance assigned to it. 
 This importance is initially chosen based on dataset size of the respective client.
 Malicious clients are hopefully deemed less important until they reach a certain threshold and are then subsequently blocked.
 \\ \\
-The relative performance of FedMGDA+ really shines through when comparing its performance with and without attacks \cite{fedmgda}.
+The performance of FedMGDA+ really shines through when comparing its performance with and without attacks \cite{fedmgda}.
 For no attacks, it tends to perform a bit worse on average compared to other aggregation methods like FedAvg.
 However, when attacks are introduced, it performs much better than certain other aggregators due to its dynamic weighting system in place.
 
@@ -55,9 +63,9 @@ However, when attacks are introduced, it performs much better than certain other
 A different approach is to try and minimise the variance of model parameters so that we can improve the resiliency of the aggregation.
 One technique of doing this is through group-wise robust aggregation (GroupRA) \cite{cluster_robagg}.
 Here the model parameters from the clients are clustered based on similarity (e.g. difference between parameter values).
-A popular choice would be k-means clustering but this also has some extra overhead of trying to find the optimal k.
-Through trial and error this should not be too hard though.
-We can then apply robust aggregation to each cluster individually using any aggregation of choice (e.g. MKRUM, COMED).
+A popular choice would be k-means clustering. 
+While this has some extra overhead of trying to find the optimal k, it is still manageable to find through trial and error.
+We can then apply aggregation to each cluster individually using any aggregation of choice (e.g. FedAvg, FedSGD).
 \\ \\
 Clustering gives byzantine clients 2 options, to be spread out or for them to try to stick together and actively deviate the centre of the cluster.
 \begin{enumerate}
@@ -73,10 +81,10 @@ A typical choice would be to have each cluster weighted by its normalised cluste
 A more refined method would be to take the single cluster centre for each cluster and apply that to the global model and test it on a small dataset.
 Weights are then assigned based on their accuracy but it could be quite a computationally expensive process.
 \\ \\
-When tested under a model poisoning attack with CIFAR-10 and MNIST, GroupRA outperformed all other robust aggregation strategies tested (e.g. KRUM, Median). 
+When tested under a small model poisoning attack with CIFAR-10 and MNIST, GroupRA achieved a higher accuracy than the other robust aggregation strategies tested (e.g. KRUM). 
 It should be noted though that there were some k-means clustering optimisation going on here as well.
 Unoptimised k values end up performing just as badly as the other aggregation methods.
-This is because with too few or too many clusters, you essentially just get the standard robust aggregation method used.
+This is because with too few or too many clusters, we revert back to the standard robust aggregation method.
 
 \subsection{Spectral Anomaly Detection \& Variational Auto-encoder}
 Spectral Anomaly Detection (SAD) is a highly effective anomaly detection method \cite{sad}.
@@ -91,7 +99,7 @@ For the encoder, a Variational Auto-Encoder (VAE) is used with dynamic threshold
 This has benefits over other methods as the detection threshold is only created after the central server has received all of the clients' model updates.
 This stops the byzantine clients from knowing the detection mechanism beforehand, which can help with them not being able to carry out more clever model-poisoning attacks to escape being caught.
 \\ \\
-The theory behind why this works is that the byzantine clients have to make quite significant changes for their model update to have any real effect.
+This works as the byzantine clients have to make quite significant changes for their model update to have any real effect.
 This is due to the averaging nature of the base aggregation of FedAvg or FedSGD.
 So these larger updates become more noticeable under the scope of the encoder-decoder model due to the size of the reconstruction error.
 \\ \\
