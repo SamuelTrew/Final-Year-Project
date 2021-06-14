@@ -24,10 +24,10 @@ I will end this project with a few ways that I have thought of in which the work
 Throughout this project, the main focus has been on IID data.
 This is because Federated Learning naturally has problems when trying to aggregate on this type of data and so it would interfere with the type of testing we were doing.
 \\ \\
-That doesn't mean that it isn't extremely important to consider though.
+That does not mean that it is not extremely important to consider though.
 Several methods already exist for non-robustly aggregating on non-IID data (e.g. FedMA, Auto-FedAvg) but the space for non-IID aggregation for robust aggregators is more limited.
 This is because it forms an even trickier problem to handle.
-If we have a variety of aggregators basing their aggregation on anomaly detection, it could very well come to pass that certain clients with odd distributions of data don't make the cut.
+If we have a variety of aggregators basing their aggregation on anomaly detection, it could very well come to pass that certain clients with odd distributions of data do not make the cut.
 This would hinder the generalisability of the global model as crucial data could be being left out.
 Even ignoring anomaly detection, certain aggregators like COMED would only be sampling from such a small amount of clients that it would without-a-doubt not be able to cover the entire space of data that is being handled.
 \\ \\
@@ -47,23 +47,23 @@ This could also be paired with multiple different pairs of flipping e.g. 2 and 5
 This might prove harder for clustering strategies to then group them into their individual clusters by themselves.
 However, if there is overflow into benign clusters, the use of COMED instead of FedAvg at the internal aggregator level could be used to help further mitigate this overflow.
 \\ \\
-Another style of attack that wasn't looked into as rigorously was untargeted attacks.
+Another style of attack that was not looked into as rigorously was untargeted attacks.
 Here, we could randomly flip all the labels or offset them all by one in such a way that it causes non-specific havoc.
-This would probably be a fairly noticeable attack to several of the robust aggregation strategies, but it wouldn't at least be specific for any given label.
+This would probably be a fairly noticeable attack to several of the robust aggregation strategies, but it would not at least be specific for any given label.
 
 
 \subsection{Local Test Data}
-In most federated learning solutions, clients don't test/validate their data locally to see how it performs.
+In most federated learning solutions, clients do not test/validate their data locally to see how it performs.
 Even when they do, it's more for a personal scoring metric, that might be used in something like personalisation, to help them individually.
 What would be more interesting is if the local clients sent their validation performance to the central server along with the model update.
 The reasoning behind this is that if you are a malicious client, you are faced with three options:
 \begin{enumerate}
     \item Have the validation dataset have all of its labels also set to 0.
     In this case the malicious clients will initially end up with an exceedingly high accuracy compared to the other clients, which would be suspicious.
-    As the aggregation carries on, the malicious clients will have their performance degrade (if they don't overpower the system) as they gain more influence from the benign clients' model aggregation.
+    As the aggregation carries on, the malicious clients will have their performance degrade (if they do not overpower the system) as they gain more influence from the benign clients' model aggregation.
     This would be quite an anomaly to see the performance degrade and so might be a way to highlight malicious clients.
     
-    \item Use the original validation set that hasn't been tampered with.
+    \item Use the original validation set that has not been tampered with.
     In this case, the initial performance would be rock-bottom, leading to a potentially very-low assigned weight.
     This would then cause either blocking or for minimal effect to occur on the aggregation, ultimately looking like a big anomaly from the get-go.
     
@@ -79,7 +79,7 @@ As you can see, all three methods outlined have their issues and so further inve
 \subsection{Block and Rerun}
 This is a rather simple idea but it is based on the fact that both AFA and FedMGDA++ end up blocking all of the malicious clients even when they no longer work (> 11 malicious clients).
 This leads to an idea where the whole federated solution is run once initially to see which clients get blocked and then run again (potentially with a different aggregator) but without the blocked clients.
-There then wouldn't be the problem of having to worry about malicious clients as much, and it would leave room for higher number of malicious client attacks to be able to be robustly aggregated against.
+There then would not be the problem of having to worry about malicious clients as much, and it would leave room for higher number of malicious client attacks to be able to be robustly aggregated against.
 
 
 \subsection{Medical Data}

@@ -103,13 +103,13 @@ This works as the byzantine clients have to make quite significant changes for t
 This is due to the averaging nature of the base aggregation of FedAvg or FedSGD.
 So these larger updates become more noticeable under the scope of the encoder-decoder model due to the size of the reconstruction error.
 \\ \\
-The ways in which other aggregation methods can fail where SAD VAE doesn't are:
+The ways in which other aggregation methods can fail where SAD VAE does not are:
 \begin{enumerate}
-    \item Hard-Thresholding (Sign-Flipping): the VAE uses dynamic thresholding at each round after receiving the model updates and so isn't susceptible.
+    \item Hard-Thresholding (Sign-Flipping): the VAE uses dynamic thresholding at each round after receiving the model updates and so is not susceptible.
     
     \item Noise: adding some noise to the model can help protect privacy through DP but when too much is added it can hurt the model's accuracy. 
     The SAD helps negate this somewhat by having the step to reduce noisy features so as to focus on the more import features of the data.
     
-    \item Model Poisoning: this requires prior knowledge of the system and seeing as the VAE is dynamic, trying to use crafted smaller updates to not get picked up won't work as well here.
+    \item Model Poisoning: this requires prior knowledge of the system and seeing as the VAE is dynamic, trying to use crafted smaller updates to not get picked up will not work as well here.
 \end{enumerate}
 Through experiments done \cite{spectral}, it has been show that the model accuracy with attacks can come closer or be the same as model accuracy without attacks.

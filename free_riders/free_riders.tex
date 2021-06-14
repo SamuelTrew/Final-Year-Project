@@ -18,7 +18,7 @@ Standard clients tend to show a general noisy shape that has an initial increase
 \end{figure}
 
 As you can see, free-riders will have to try and match this general shape in order to stay hidden. 
-However, it may be that the central server doesn't find itself in a position where it cares unduly.
+However, it may be that the central server does not find itself in a position where it cares unduly.
 Looking at the case where there are 5 free-riders in a basic attack [\ref{fig:5free}], the accuracy tends to be really good all-round with the slight exception of FedMGDA++.
 If the main concern of the central server is simply the accuracy at the end of the model, then ultimately it may not be considered an issue.
 However, if there is intellectual property or monetary value at stake, free-riders might not be acceptable.
@@ -64,7 +64,7 @@ Now, it's obviously not a perfect solution but it does show the more characteris
 Again, it is not a ultra-finely tuned system but definitely approaches a solution that much more closely resembles a correct one.
 \\ \\ 
 One basic detection method would be to just check if there are any clients with identical StD characteristics but obviously this attack would benefit from some noise and scaling in places.
-This is important to note as ultimately there are an endless amount of possibilities of fine-tuning a free-rider could do to any attack vector and so getting bogged down in the nitty-gritty doesn't contribute much.
+This is important to note as ultimately there are an endless amount of possibilities of fine-tuning a free-rider could do to any attack vector and so getting bogged down in the nitty-gritty does not contribute much.
 
 
 \subsection{Privacy Amplification with User Sampling}
@@ -95,7 +95,7 @@ You can see the effects in [\ref{fig:std_priv}] quite clearly and the free-rider
 	\label{fig:std_priv}
 \end{figure}
 
-The graph shows a lot of data at zero as well and that's just because the gradient weights will be non-existent if they haven't been trained.
+The graph shows a lot of data at zero as well and that's just because the gradient weights will be non-existent if they have not been trained.
 
 
 \section{Robust Aggregation}
@@ -114,7 +114,7 @@ The more interesting point to note was the transition over the halfway point [\r
 This is noteworthy due to it again highlighting COMED's weakness around this point as an aggregator and how it so quickly falls down.
 Especially as the other aggregators then proceed to essentially not change much more than normal and are capable of aggregating at a rate such that the decline in accuracy is fairly constant.
 \\ \\
-The reason the other aggregators don't fall short as badly, is because the free-riders act more as an LR softener.
+The reason the other aggregators do not fall short as badly, is because the free-riders act more as an LR softener.
 Essentially, they slow down the rate at which the model converges as you are just adding a bunch of dampening parameters, that are the previous model, to the next global model.
 This is why you mainly just see the curves for things like FedAvg, AFA and MKRUM just be at a shallower angle as opposed to having the final position be too much higher.
 \begin{figure}[htbp]
@@ -153,5 +153,5 @@ On the one hand, they do very minimal damage and cannot be simply detected and b
 On the other hand, they can be capable of masking themselves with fake informational noise to great extents and are ultimately providing fake information to the global model.
 \\ \\
 It poses a peculiar threat and yet through evaluation of the performance, seems to show no characteristics of being one.
-Now, robust aggregators weren't built for this purpose and that is precisely why other methods for detection have been covered.
+Now, robust aggregators were not built for this purpose and that is precisely why other methods for detection have been covered.
 Ultimately, the global model would benefit more without them and the clients behind the free-riders are getting this model for free and so it really comes down to whether or not either of these things matter much to the specific situation.

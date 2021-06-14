@@ -1,7 +1,7 @@
 If data stayed amongst those that owned or governed it, then there would be less of a need for privacy preserving mechanisms. 
 However in FL, while clients do process data on their own devices, the results are then sent to a centralised server for aggregation. 
 \\ \\
-In FL we are trying to have all the clients keep hold of their data whilst still being able to contribute it in a form that doesn't actually involve the sharing of it. The data is usually uneven as each client involved could have wildly different sizes of data or even wildly different backgrounds for the data. Two examples of this would be:
+In FL we are trying to have all the clients keep hold of their data whilst still being able to contribute it in a form that does not actually involve the sharing of it. The data is usually uneven as each client involved could have wildly different sizes of data or even wildly different backgrounds for the data. Two examples of this would be:
 \begin{enumerate}
     \item Monitoring users' interactions with an app and training a model on the user's phone to make accurate predictions about what ads they'll like. 
     The model update calculated will be hyper-specific and over-fitted to an individual user at first. 
@@ -10,12 +10,12 @@ In FL we are trying to have all the clients keep hold of their data whilst still
     
     \item If you had a group of hospitals that all had a large amount of patient data and they wanted to train a model for some arbitrary reason, they would be able to again train locally and send off the model just like before. 
     However, you could end up having 1 hospital that deals with a disproportionately large amount of elderly patients and their model would be skewed in that favour. 
-    This can help the other hospitals who don't have as much access to such data. 
+    This can help the other hospitals who do not have as much access to such data. 
     This is a mutually beneficial exchange, as it also gives the original hospital more access to younger patient data. 
     As such, results are more easily able to generalise regardless of the age.
 \end{enumerate}
 As you can see, through FL, we are able to get more accurately trained models on otherwise private and sensitive data. 
-This provides unprecedented potential for medical data to be used for research purposes where we won't need direct access to the data. However, as too-good-to-be-true as this might sound, there are obvious barriers in the way. 
+This provides unprecedented potential for medical data to be used for research purposes where we will not need direct access to the data. However, as too-good-to-be-true as this might sound, there are obvious barriers in the way. 
 For the hospitals and practices, not only will they have to standardise all of their data in an agreed-upon way, they will also have to hugely invest in some form of computing infrastructure such as something on-premise or in the cloud \cite{future_health_fl}. 
 This involves a high initial cost as there is computing power needed for training such large amounts of data. 
 This also does not mean that researchers outside of the hospital will even be able to use the data anyway, just that the Clinicians, Patients, Manufacturers and Healthcare providers can all benefit from the improvement of the ML-based systems \cite{future_health_fl}.
@@ -55,7 +55,7 @@ One style in which this can be done is with Federated First Order Model Optimisa
 Here, the method involves each client having a goal that it aims for that is based on its own validation and test data.
 The central server then tries to group clients that want to achieve similar goals together so that they can contribute towards their own model together.
 \\ \\
-This method is a tad odd in that it doesn't seem to focus on generalisation and making sure the models utilise all of the data from the clients in a constructive way.
+This method is a tad odd in that it does not seem to focus on generalisation and making sure the models utilise all of the data from the clients in a constructive way.
 However, there are a variety of different ways in which this personalisation could be implemented and ultimately the solution chosen should reflect the problem that is trying to be solved.
 
 
@@ -63,7 +63,7 @@ However, there are a variety of different ways in which this personalisation cou
 Attempting to amplify privacy via user sampling is a method in which not all clients are chosen to participate at every federated round.
 Its main use is for helping to preserve the privacy of the clients involved through minimising honest-but-curious clients' interest in information leakage.
 \\ \\
-This seems like it would be an interesting solution to help the clients' privacy but unfortunately it isn't without its drawbacks.
+This seems like it would be an interesting solution to help the clients' privacy but unfortunately it is not without its drawbacks.
 Experiments have shown that generally decreasing the probability (p) for clients to be picked leads to quite a significant decrease in convergence rate as well as a decrease in training accuracy \cite{privamp}.
 \\ \\
 Depending on what trade-offs you are willing to make, its gives the user quite a bit of flexibility in terms of having either more privacy, better accuracy or some combination of both.
@@ -81,8 +81,8 @@ Some different styles of poisoning (changing something in a negative manner) are
 All methods excluding the final option are easily accessible to any client.
 This is because the client owns their data and as such is in full control and can change it as needed. 
 In terms of model reading and writing, the client will receive the model and can send back whatever they like. 
-The central server has no way of stopping any of this and without breaking the whole notion behind federated learning, cannot have the clients data checked for tampering (unless some encrypted form of ML was used, which is extremely slow and computationally expensive). 
-In theory if you had control of the client side as well (e.g. a mobile app), then you probably wouldn't need to worry about the model poisoning side of things. 
+The central server has no way of stopping any of this and without breaking the whole notion behind federated learning, cannot have the clients data checked for tampering (unless some encrypted form of ML was used, which is extremely slow and computationally expensive). \\ \\
+In theory if you had control of the client side as well (e.g. a mobile app), then you probably would not need to worry about the model poisoning side of things. 
 The final option assumes that the malicious client essentially has complete control over the system and at this point it is essentially impossible to design a robust aggregation system \cite{robagg_fl}.
 \begin{center}
     \begin{longtable}{ |c|c|c|c|c| }

@@ -1,4 +1,4 @@
-When it comes to aggregating, there are a variety of different methods which people have tried so as to achieve different results.
+When it comes to aggregation, there are a variety of different methods which people have tried so as to achieve different results.
 This can vary from using encrypted data, simple weighted-averaging of data or more robust methods.
 When it comes to non-robust strategies, the typical focus is on trying to make the accuracy as good as possible and ideally with non-iid data.
 
@@ -27,7 +27,7 @@ Where $d$ denotes the entire dataset size, $d_i$ is the size of the dataset for 
 
 \subsection{Federated Matched Averaging}
 Federated Matched Averaging (FedMA) \cite{fedma} was brought about to solve federated learning accuracy problems that occur in modern architectures and models such as LSTMs and CNNs.
-Due to their deep and more complex nature, these architectures don't aggregate well under more coordinated style aggregations, like those found in FedAvg.
+Due to their deep and more complex nature, these architectures do not aggregate well under more coordinated style aggregations, like those found in FedAvg.
 \\ \\
 The algorithm works by aggregating the models layer-by-layer by starting with the initial layer and performing a weighted-averaging on it.
 It then proceeds to broadcast this layer out to the clients and the clients then continue to train all of the layers after the broadcasted layer for a few rounds.
@@ -54,4 +54,4 @@ Each round, the clients sample a mini-batch of their data and compute the $\alph
 The loss of the $\beta$ weights is then calculated with regards to the mini-batched data before $\beta$ is subsequently updated with $\gamma$.
 The server then gathers up each $\beta$ weights from each client's local loss calculation and they are averaged to form the $\beta$ for the next round that is used to calculate the $\alpha$.
 \\ \\
-\textit{N.B. the paper relating to this method \cite{autofa} was released in April of 2021 and is still under development. As such, the methodology and implementation is still up to change as well as their experimentation results. In this area, it claims to be SotA and that it is better than FedMA in similar tasks, but this hasn't been peer-reviewed as of writing.}
+\textit{N.B. the paper relating to this method \cite{autofa} was released in April of 2021 and is still under development. As such, the methodology and implementation is still up to change as well as their experimentation results. In this area, it claims to be SotA and that it is better than FedMA in similar tasks, but this has not been peer-reviewed as of writing.}
