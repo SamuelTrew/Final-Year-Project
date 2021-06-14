@@ -136,7 +136,7 @@ However, it should be noted that the increase in variance did not appear to show
 \\ \\
 However, the noise variation that is typically observed by the benign clients, through something like SGD, decreases as the model converges.
 So the free-rider must in turn decrease their noise in a similar asymptotic manner to their noise added.
-This again works until a certain extent but anomaly detection methods such as Deep Autoencoding Gaussian Mixture Models (DAGMM) \cite{dagmm} have been shown to still be able to detect the free-riders as anomalies \cite{freerider_defence}.
+This again works until a certain extent but anomaly detection methods such as Deep Autoencoding Gaussian Mixture Models (DAGMM) \cite{dagmm} have been shown to detect the free-riders as anomalies \cite{freerider_defence}.
 \\ \\
 The main way for free-riding clients to then hide is to use a ``delta-weight attack" \cite{freerider_defence}.
 Here, they instead use the difference between the previous and current global models and assign that difference to the gradient weights of the parameters.

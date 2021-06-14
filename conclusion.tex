@@ -1,0 +1,87 @@
+\section{Conclusion}
+This project, in its entirety, has achieved the goals that it set out to do as outlined in the introduction and in the beginning of Chapter \ref{chap:fedpadrc}.
+Evaluation was done on all of the current most popular forms of robust aggregation, leading to being able to make additional enhancements made to FedMGDA+.
+Accuracy improvements and robustness of FedMGDA++ was discussed and shown with more noticeable improvements made to capability of blocking.
+It went from blocking five clients (three benign and two malicious) to blocking all of the malicious clients and no benign ones with eight malicious clients.
+It also allowed for a smoother learning process and higher numbers of malicious clients being handled, up to around 11 malicious clients.
+\\ \\
+We also saw how free-riders were able to absolutely smash past all robust aggregators and prove incapable of being detected by traditional means.
+This further proved the need for a robust aggregator that was more capable of handling the federated domain.
+\\ \\
+Through clustering, this project proved that robust aggregation methods like COMED could be significantly enhanced to be able to handle up to around 22 malicious clients well, far surpassing that of any other solution currently available.
+Further work was then done to strengthen the robustness of the algorithm through dimension reduction with PCA before finally optimising the performance with personalisation methods.
+We saw up to 26 malicious clients being easily handled by our variety of FedPADRC configurations as well as handling free-riders in a way that no other previous solution could.
+It should be noted that 26 is somewhat of a theoretical limit with K=5 K-Means Clustering, due to having any fewer benign clients would automatically assign more than one cluster to the malicious clients.
+\\ \\
+All-in-all, all goals that were met were comfortably done so.
+We also provided a robust aggregator that has been shown to be the best performing under the given attack strategies as well as being a more robust algorithm as a whole.
+
+\section{Future Work}
+There are many ways in which this project could be extended if time permitted.
+I will end this project with a few ways that I have thought of in which the work done could be taken further.
+
+\subsection{Non-IID Data}
+Throughout this project, the main focus has been on IID data.
+This is because Federated Learning naturally has problems when trying to aggregate on this type of data and so it would interfere with the type of testing we were doing.
+\\ \\
+That doesn't mean that it isn't extremely important to consider though.
+Several methods already exist for non-robustly aggregating on non-IID data (e.g. FedMA, Auto-FedAvg) but the space for non-IID aggregation for robust aggregators is more limited.
+This is because it forms an even trickier problem to handle.
+If we have a variety of aggregators basing their aggregation on anomaly detection, it could very well come to pass that certain clients with odd distributions of data don't make the cut.
+This would hinder the generalisability of the global model as crucial data could be being left out.
+Even ignoring anomaly detection, certain aggregators like COMED would only be sampling from such a small amount of clients that it would without-a-doubt not be able to cover the entire space of data that is being handled.
+\\ \\
+When it comes to clustering, a different problem is faced altogether.
+You could have clients that hold labels 1, 2, 3 and others that hold only 7 and 8.
+This would lead to clusters forming around these similar clients.
+This is not necessarily a bad thing if the model that these clients are after is highly personalised, but with the selective method of personalisation, you would be leaving out potentially entire labels of data.
+This might lead to further fine tuning and investigation needed into the generalisation method of personalisation in making it more robust so as to be able to handle these non-IID cases.
+Having a more distributed data space would also increase the likelihood of the malicious/free-riding clients to be included with other benign clients and clusters, breaking the robustness of the model.
+Investigations into the use of higher K-values for clustering might be needed here.
+
+\subsection{Label Flipping Attacks}
+The attack that was used throughout this project was setting the malicious clients' labels to be all zero.
+It would be worth investigating the effects of changing this attack to be something more subtle such as changing 3s and 8s around.
+This might mean that the malicious clients end up appearing more benign to FedPADRC or it could be that they're still different enough for it to pick up on.
+This could also be paired with multiple different pairs of flipping e.g. 2 and 5, 3 and 8, 8 and 0 etc.
+This might prove harder for clustering strategies to then group them into their individual clusters by themselves.
+However, if there is overflow into benign clusters, the use of COMED instead of FedAvg at the internal aggregator level could be used to help further mitigate this overflow.
+\\ \\
+Another style of attack that wasn't looked into as rigorously was untargeted attacks.
+Here, we could randomly flip all the labels or offset them all by one in such a way that it causes non-specific havoc.
+This would probably be a fairly noticeable attack to several of the robust aggregation strategies, but it wouldn't at least be specific for any given label.
+
+
+\subsection{Local Test Data}
+In most federated learning solutions, clients don't test/validate their data locally to see how it performs.
+Even when they do, it's more for a personal scoring metric, that might be used in something like personalisation, to help them individually.
+What would be more interesting is if the local clients sent their validation performance to the central server along with the model update.
+The reasoning behind this is that if you are a malicious client, you are faced with three options:
+\begin{enumerate}
+    \item Have the validation dataset have all of its labels also set to 0.
+    In this case the malicious clients will initially end up with an exceedingly high accuracy compared to the other clients, which would be suspicious.
+    As the aggregation carries on, the malicious clients will have their performance degrade (if they don't overpower the system) as they gain more influence from the benign clients' model aggregation.
+    This would be quite an anomaly to see the performance degrade and so might be a way to highlight malicious clients.
+    
+    \item Use the original validation set that hasn't been tampered with.
+    In this case, the initial performance would be rock-bottom, leading to a potentially very-low assigned weight.
+    This would then cause either blocking or for minimal effect to occur on the aggregation, ultimately looking like a big anomaly from the get-go.
+    
+    \item Lie about the validation accuracy with some strategy behind the updated scores.
+    This would then involve prior knowledge of the system and the other clients to be able to make assumptions on how they will perform to blend in.
+    This might be possible based on the network used, the LR and other parameters.
+    However, no client would see any other client's score and would only be getting a global model update, not an individual one from each client.
+\end{enumerate}
+
+As you can see, all three methods outlined have their issues and so further investigation could prove fruitful in terms of robustly aggregating.
+
+
+\subsection{Block and Rerun}
+This is a rather simple idea but it is based on the fact that both AFA and FedMGDA++ end up blocking all of the malicious clients even when they no longer work (> 11 malicious clients).
+This leads to an idea where the whole federated solution is run once initially to see which clients get blocked and then run again (potentially with a different aggregator) but without the blocked clients.
+There then wouldn't be the problem of having to worry about malicious clients as much, and it would leave room for higher number of malicious client attacks to be able to be robustly aggregated against.
+
+
+\subsection{Medical Data}
+Ideally FedPADRC should get tried and tested more thoroughly with more proper datasets such as medical ones.
+This is to just help ensure that it works better in the real-world and not just with MNIST.

@@ -30,11 +30,11 @@ Increasing the number of clients beyond the 30 here to systems with orders of ma
 
 \subsection{Aggregator Capabilities}
 There are 9 different combinations of aggregators that I can try but realistically having FedAvg be the aggregator in the second aggregation step is pretty futile as malicious clients are pretty guaranteed to get through and damage the model.
-Also, for trying to segregate the clients' models from each other, more training than the standard 2 epochs will need to be done.
+Also, for trying to segregate the clients' models from each other, more training than the standard two epochs will need to be done.
 So, I increased the number of epochs per round to 10 when we're clustering so that each client's model can appropriately represent itself before it is clustered.
 \\ \\
 Very early on it appeared to be apparent that using MKRUM as an external and internal aggregator proved pretty much useless.
-This was because with just 1 attack, it's performance was all over the place [\ref{fig:mkrum_bad}] with any internal aggregator.
+This was because with just one attack, it's performance was all over the place [\ref{fig:mkrum_bad}] with any internal aggregator.
 However, COMED on the other hand seemed to steam-roll right through any number of malicious clients, only starting to fail at around 22 malicious clients.
 This is incredible as this outperforms any of the other robust aggregation methods tested!
 \begin{figure}[htbp]
@@ -81,9 +81,16 @@ Funnily enough, there ended up not being any particular point that could be real
 I did the above calculations for no attacks, 5 and 20 malicious at rounds 0, 5 and 20 [\ref{fig:k_elbow}].
 This was so that I was able to see how representation of the data changed throughout so I wasn't simply basing my analysis from 1 point.
 \\ \\
+\begin{figure}[htbp]
+	\centering
+    \includegraphics[scale=0.25]{my_agg/graphs/k_elbow.png}
+	\caption{Finding the Elbow Point for K-Means Clustering}
+	\label{fig:k_elbow}
+\end{figure}
+\\ \\
 Under no attacks, the line was a constant gradient on average and gave no hint of an optimum point.
-Under 5 malicious there were similar characteristics but with a slightly steeper descent at first, potentially hinting at some K-value around 4.
-At 20 malicious is where things get weird and it is almost like a K of 2 is the best.
+Under five malicious there were similar characteristics but with a slightly steeper descent at first, potentially hinting at some K-value around four.
+At 20 malicious is where things get weird and it is almost like a K of two is the best.
 \\ \\
 Interpreting these results is interesting to say the least, but one last method I can try is to see what the final and/or minimum error rate values are at each K and see if that can shed any more light on the situation.
 What I am expecting is that there won't be much difference with 0 attacks but having a good K value will be more and more important with 5 and 20 as that is where you'll see damage starting to be being done.
@@ -94,30 +101,36 @@ What I am expecting is that there won't be much difference with 0 attacks but ha
     \hline
     K & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & ... & 15 & ... & 30 \\ \hline
     \multicolumn{13}{|c|}{} \\ \hline
-    0-Min & 5.3 & 7.4 & 5.7	& 5.7	& 5.4	& 5.3	& 5.3	& 5.1 & ...	& 5.4 & ... & 5.4 \\ \hline
-    0-Final & 5.3	& 7.9	& 5.8	& 5.8	& 5.4	& 5.5	& 5.6	& 5.1 & ...	& 5.4 & ...  & 5.4 \\ \hline
+    0-Min & 5.3 & 7.4 & \textbf{5.7}	& \textbf{5.7}	& \textbf{5.4}	& 5.3	& 5.3	& 5.1 & ...	& 5.4 & ... & 5.4 \\ \hline
+    0-Final & 5.3	& 7.9	& \textbf{5.8}	& \textbf{5.8}	& \textbf{5.4}	& 5.5	& 5.6	& 5.1 & ...	& 5.4 & ...  & 5.4 \\ \hline
     \multicolumn{13}{|c|}{} \\ \hline
-    5-Min & 8.8 &	90.2 &	14.1 &	9.4 &	7.2 &	6.5 &	6.3 &	6.0 & ... &	5.6 & ...  & 7.3 \\ \hline
-    5-Final & 28.6	& 90.2	& 16.2	& 9.4	& 7.9	& 6.5	& 6.3	& 6.0 & ...	& 5.8 & ...  & 7.5 \\ \hline
+    5-Min & 8.8 &	90.2 &	14.1 &	\textbf{9.4} &	\textbf{7.2} &	\textbf{6.5} &	6.3 &	6.0 & ... &	5.6 & ...  & 7.3 \\ \hline
+    5-Final & 28.6	& 90.2	& 16.2	& \textbf{9.4}	& \textbf{7.9}	& \textbf{6.5}	& 6.3	& 6.0 & ...	& 5.8 & ...  & 7.5 \\ \hline
     \multicolumn{13}{|c|}{} \\ \hline
-    20-Min & 90.2	& 90.2	& 13.4	& 9.4	& 7.3	& 7.4	& 6.5	& 6.4 & ...	& 25.4 & ...  & 89.7 \\ \hline
-    20-Final & 90.2	& 90.2	& 16.39	& 9.82	& 8.24	& 7.4	& 6.72	& 11.9	& ...	& 26.94 & ...  & 90.2 \\ \hline
+    20-Min & 90.2	& 90.2	& 13.4	& \textbf{9.4}	& \textbf{7.3}	& \textbf{7.4}	& 6.5	& 6.4 & ...	& 25.4 & ...  & 89.7 \\ \hline
+    20-Final & 90.2	& 90.2	& 16.39	& \textbf{9.82}	& \textbf{8.24}	& \textbf{7.4}	& 6.72	& 11.9	& ...	& 26.94 & ...  & 90.2 \\ \hline
     \end{longtable}
 \end{center}
 Through setting the number of rounds to 15 to stop over-fitting and remove the peaks near the end, we can now see how the solutions perform at various points in Table \ref{tbl:k_error_rate}.
-Seeing the no attack error rates really seemed to fit perfectly with the previous test done as the value doesn't change too much [\ref{fig:k_elbow_0}] except when K is 2.
+Seeing the no attack error rates really seemed to fit perfectly with the previous test done as the value doesn't change too much [\ref{fig:k_elbow_0}] except when K is two.
 After about the halfway point, K seems to do a little worse as well on average, indicating that it's probably become too high (although it's very minimal).
 \\ \\
-Where things start to change a bit is when we increase the number of malicious clients to 5.
-Here, we now notice [\ref{fig:k_elbow_5}] that K has to be a minimum of 3 for the clustering to work properly.
-Going any higher than 6/7 gives no improvement and would be overkill in this situation.
+Where things start to change a bit is when we increase the number of malicious clients to five.
+Here, we now notice [\ref{fig:k_elbow_5}] that K has to be a minimum of three for the clustering to work properly.
+Going any higher than six/seven gives no improvement and would be overkill in this situation.
 It should be noted that right at the very end, when the algorithm is essentially just COMED by itself, there is a gentle increase in the error rate.
-\\ \\
-Finally, we hit some good data with 20 malicious clients [\ref{fig:k_elbow_20}] as there is a proper U-shape to the error rate.
-This further highlights that between 3 and 5 is the optimum number for K with the elbow-point being at about 3 or 4.
-Noticing that the final value at K=3 is slightly higher than the minimum value suggests that the solution there is getting a bit worse nearer to the end of the federated rounds.
-This leads me to conclude that a K of around 5 is the optimal for this instance but in general terms, values between 3 and 7 should probably work fine.
 
+\begin{figure}[htbp]
+	\centering
+    \includegraphics[scale=0.55]{my_agg/graphs/k_elbow_20.png}
+	\caption{Error Rate As K Increases - 20 Malicious}
+	\label{fig:k_elbow_20}
+\end{figure}
+
+Finally, we hit some good data with 20 malicious clients [\ref{fig:k_elbow_20}] as there is a proper U-shape to the error rate.
+This further highlights that between three and five is the optimum number for K with the elbow-point being at about three or four.
+Noticing that the final value at K=3 is slightly higher than the minimum value suggests that the solution there is getting a bit worse nearer to the end of the federated rounds.
+This leads me to conclude that a K of around five is the optimal for this instance but in general terms, values between three and seven should probably work fine.
 
 
 
@@ -148,10 +161,10 @@ This works very nicely for us as we want to keep as much useful information as p
 	\label{fig:pca_00}
 \end{figure}
 \\ \\
-As seen in [\ref{fig:pca_00}], we can start to see that a dimension value of around 1-4 is probably the sweet spot.
+As seen in Figure \ref{fig:pca_00}, we can start to see that a dimension value of around one-four is probably the sweet spot.
 Other rounds later on [\ref{fig:pca_01}, \ref{fig:pca_02}] may appear to indicate that actually we don't want to perform PCA at all.
 However, this pattern only really appears when there are no attacks present and as soon as we start adding some, it becomes more apparent [\ref{fig:pca_50}] that this is not the case.
-Instead, we end up seeing that a dimension value of 1 looks to be a pretty safe bet with some potential at round 2-4.
+Instead, we end up seeing that a dimension value of one looks to be a pretty safe bet with some potential at rounds two-four.
 
 
 \subsection{Low Dimensional Beings}
@@ -162,21 +175,30 @@ It should be noted that the 4th dimensions is represented by size of the plotted
 \\ \\
 With no attacks you get pretty much what you would expect [\ref{fig:0mal_dims}] and all 4 dimensions show to add some level of useful information.
 When we start adding attacks, we would expect that the most information gain happens from 1D and that is pretty much what you get at an initial glance.
+
+\begin{figure}[htbp]
+	\centering
+    \includegraphics[scale=0.7]{my_agg/graphs/4d_diff.png}
+	\caption{PCA Transform Positions in 4D, Alternate View - 20 Malicious - Round 0}
+	\label{fig:4d_diff}
+\end{figure}
+
+As shown in Figures \ref{fig:5mal_dims} \& \ref{fig:20mal_dims}, we see that the remaining three dimensions all have the malicious clients placed in the middle of the same region [\ref{fig:4d_diff}] in their respective dimensions.
+However, what becomes important is the scattering of the benign clients.
+In all other dimensions they are far more unique, which lends them to not be clustered with the malicious clients even if the first dimension were to fail at separating the two groups.
+This is also seen in practice, where the accuracy of 1D solutions tends to end up including more malicious clients as time goes on, showing that the segmentation isn't working as well as the Explained Variance would have you believe.
+
 \begin{figure}[htbp]
 	\centering
     \includegraphics[scale=0.33]{my_agg/graphs/5mal_dims.png}
 	\caption{PCA Transform Positions over Four Dimensions - 5 Malicious}
 	\label{fig:5mal_dims}
 \end{figure}
-As shown in Figures \ref{fig:5mal_dims}, \ref{fig:20mal_dims}, we see that the remaining 3 dimensions all have the malicious clients placed in the middle of the same region [\ref{fig:4d_diff}] in their respective dimensions.
-However, what becomes important is the scattering of the benign clients.
-In all other dimensions they are far more unique, which lends them to not be clustered with the malicious clients even if the first dimension were to fail at separating the 2 groups.
-This is also seen in practice, where the accuracy of 1D solutions tends to end up including more malicious clients as time goes on, showing that the segmentation isn't working as well as the Explained Variance would have you believe.
 \\ \\
 This is most likely due to the global aggregation sharing the global model out to every client, softening the malicious clients and making them appear more benign in the process.
 This causes their PCA transform values to spread out more, increasing the likelihood that more clusters will be assigned to them.
-This \textit{can} be mitigated through increasing the number of epochs per round (that's why 10 is used instead of 2) but it isn't a perfect solution.
-We are currently able to fix this through using 4 dimensions for the PCA but there is obviously something about 1D PCA that seems so tempting.
+This \textit{can} be mitigated through increasing the number of epochs per round (that's why 10 is used instead of two) but it isn't a perfect solution.
+We are currently able to fix this through using four dimensions for the PCA but there is obviously something about 1D PCA that seems so tempting.
 \\ \\
 Increasing the number of dimensions doesn't really fix this and at higher dimensions (e.g. 10 [\ref{fig:dim10_26mal}] or 29 [\ref{fig:dim29_26mal}]) we still some spiking at later federated rounds.
 The error rate is also not as smooth and is more susceptible to be jagged throughout, indicating that the current algorithm isn't as robust.
@@ -190,7 +212,7 @@ This can be seen in Figure \ref{fig:mal_spread} as the spread is more segmented 
 So ideally, we don't want to give any malicious client a global update that will inevitably work against the benign clients.
 \begin{figure}[htbp]
 	\centering
-    \includegraphics[scale=0.2]{my_agg/graphs/mal_spread.png}
+    \includegraphics[scale=0.24]{my_agg/graphs/mal_spread.png}
 	\caption{PCA Transform Position Spread for 2D (top) \& 4D (bottom) in Rounds 0, 1, 2}
 	\label{fig:mal_spread}
 \end{figure}
@@ -206,24 +228,24 @@ However, it may end up being more beneficial to also use COMED on top of this.
 There are 4 main ways that I have come up with to achieve this, with the names that I will be using to refer to them as in the brackets:
 \begin{enumerate}
     \item Selective Update (selective): this method involves only updating a select number of the clients at each round. This number would be determined by the floor of half of the number of clusters + 1. E.g. 3 for 5 clusters, 4 for 7, 5 for 9, etc. (we will assume 3 for K=5 from here on out).
-    This would then hopefully lead to the malicious cluster not being updated (along with a benign one potentially) and the other clients in the selected clusters get an aggregated model of the top 3 clusters.
+    This would then hopefully lead to the malicious cluster not being updated (along with a benign one potentially) and the other clients in the selected clusters get an aggregated model of the top three clusters.
     \\ \\
-    This would end up causing the main 3 clusters to get updated with data from each other, ultimately having them remain more similar and therefore more likely to update again together in later rounds.
+    This would end up causing the main three clusters to get updated with data from each other, ultimately having them remain more similar and therefore more likely to update again together in later rounds.
     This would then help reduce the benign poisoning that is given to the malicious clients to help them.
     
-    \item Concentrated and General Updates (general): here, we do 2 different global model updates.
-    One is concentrated model of the top 3 best clients (as described above) and the other is a more general model from the aggregation of all of the clusters.
+    \item Concentrated and General Updates (general): here, we do two different global model updates.
+    One is concentrated model of the top three best clients (as described above) and the other is a more general model from the aggregation of all of the clusters.
     Instead of just sending the concentrated model out to the best clients, it then gives the left-out benign cluster an opportunity to contribute to the other benign clusters later on, while still hopefully keeping the top 3 best clusters away from the malicious cluster.
     \\ \\
     This might not work as well, as the malicious client is still getting updated.
     There is also the possibility of then causing the best clusters to become too similar such that they merge and give a higher likelihood for the malicious clients to form more than one cluster.
     It will almost definitely cause the non-best benign cluster to then get polluted with damage from the malicious cluster as it will have received the general update which will include the malicious cluster in the aggregation.
     
-    \item Thresholding (thresholding): instead of just using the best 3 out of 5, instead we figure out which clusters are more than a set number of StDs away from the mean and then set their weighting to 0.
+    \item Thresholding (thresholding): instead of just using the best three out of five, instead we figure out which clusters are more than a set number of StDs away from the mean and then set their weighting to zero.
     This allows us to then aggregate on the rest of the data with their own personal weighting so that in theory, you get to fully aggregate on all of the benign clients' data, instead of just some of it.
     \\ \\
-    This could also be applied in conjunction with the previous method such that the general model could then be aggregated on all non-0 weighting clusters while the concentrated model is still formed.
-    You then also have the option to not update the 0-weight cluster at all like in the first method.
+    This could also be applied in conjunction with the previous method such that the general model could then be aggregated on all non-zero weighting clusters while the concentrated model is still formed.
+    You then also have the option to not update the zero-weight cluster at all like in the first method.
     
     \item No Global Model (no global): if we were to just not aggregate the clusters' models together, then in theory each client would get a more personalised model that was best suited to them.
     It would also keep all of the malicious clients building their own malicious model while all of the benign clients build their own separate ones.
@@ -243,17 +265,19 @@ However, graphs of the PCA transform data do tend to put the benign clients' val
 \\ \\
 To do either of these methods, you need to have a starting point as a point of reference to do the calculations from.
 So, for every cluster, I calculate the scoring metric relative to that cluster so that I end up with a 2D 5x5 grid of values.
-To find the ``best" clusters, I proceed to then take the best 3 scores from each list and sum them together.
+To find the ``best" clusters, I proceed to then take the best three scores from each list and sum them together.
 Which ever the max value is, I take the according list of values, normalise them, and then use those for the weights.
-This leaves me with a set of weights where I have the 3 ``best" clusters being the closest/most similar options.
+This leaves me with a set of weights where I have the three ``best" clusters being the closest/most similar options.
 After this has taken place, I can then follow through the rest of the algorithm according to which method of personalisation I choose.
-The pseudocode to this is outlined in Algorithm \ref{alg:my_alg}.
+The pseudocode for this is outlined in Algorithm \ref{alg:my_alg}.
 \\ \\
 This weighting algorithm is used in all of the first three methods and is crucial in deciding the best models to choose from.
 One part on Line 36 should be noted as maybe not being a solution that should be incorporated every time.
 In the instance where a malicious cluster is being used in aggregation when it shouldn't be, where there are a lot of malicious clients, this weighting could cause much more drastic effects than without it.
 \\ \\
-\begin{algorithm}[H]
+
+
+\begin{algorithm}[htbp]
 \SetAlgoLined
 \DontPrintSemicolon
 \SetKw{KwIn}{in}
@@ -313,17 +337,12 @@ In the instance where a malicious cluster is being used in aggregation when it s
  \label{alg:my_alg}
 \end{algorithm}
 
-
-
-
 \section{Evaluation}
 Looking back at the goals of what I wanted to achieve, it has so far become apparent that I have been able to do them all with the current exception of detection of free-riders.
 Hopefully looking at how the various forms of personalisation perform, this goal shall also be met.
 \\ \\
 To recap, I also wanted to achieve better aggregation through personalisation for 1D PCA as well as in general and so I will be initially testing that.
 I tested selective, general, selective with thresholding, general with thresholding and no global as forms of personalisation.
-\\ \\
-To also recap on what each
 
 \subsection{4D Personalisation}
 I made sure to try with 4D PCA first, so as to make sure that I wasn't going to be losing any performance with the discussed methods.
@@ -331,13 +350,15 @@ There was also the need to test both COMED and FedAvg at both levels of aggregat
 This would enable greater generalisation capabilities that would hopefully allow more non-IID data to be aggregated better.
 \\ \\ 
 With COMED, we saw typically really good performance with the clients only starting to fail with use of the general method under 24 malicious clients [\ref{fig:4d_24mal}].
-With FedAvg, we see the same level of performance with the selective methods but under general, the no thresholding method fails pretty quickly at 5 malicious clients [\ref{fig:4d_5mal}] while the thresholding method fails at around 15 [\ref{fig:4d_15mal}].
+With FedAvg, we see the same level of performance with the selective methods but under general, the no thresholding method fails pretty quickly at five malicious clients [\ref{fig:4d_5mal}] while the thresholding method fails at around 15 [\ref{fig:4d_15mal}].
 This makes me realise that the general method is one that just doesn't perform to the same standard as without personaliation.
 \\ \\
 This is most likely because with general, we are still updating the malicious clients with a model, even if it is not as good as the selective model.
 It can also cause the benign client that isn't participating in the selective update to become more similar to that of the malicious clients, causing there to be increased chances of leakage.
 This is even without the fact that with no thresholding, you are then still just aggregating with the malicious clients at every step, and so nothing too robust is even happening.
 Therefore, proceeding with the general method for 1D would be futile and so won't be considered further.
+
+
 
 \subsection{1D Personalisation}
 Once I removed the generalisation from the testing, with both COMED and AFA I got pretty much the same results across the board.
@@ -348,14 +369,14 @@ This helps definitively prove that personalisation helps with the robustness of 
 
 
 \subsection{No Global}
-As much as has been shown that the selective method works well, what if there were more than 1 attack or more than 1 type of attack present?
+As much as has been shown that the selective method works well, what if there were more than one attack or more than one type of attack present?
 In this case, it may end up being the case that you don't want to do any aggregation amongst the clusters at all for the fear of being damaged from too many angles.
 \\ \\
 This is where the no global method shines.
 It is essentially a more strict version of the selective algorithm in that there is only aggregation taking place within each cluster and not between the clusters themselves.
 This allows for each cluster to independently perform without the worry of other clusters affecting its performance.
 \\ \\
-This works well in either 4D or 1D PCA with the sole difference being that at 26 malicious clients there are temporarily 2 clusters that contain malicious clients before eventually all of the malicious clients form into 1 cluster.
+This works well in either 4D or 1D PCA with the sole difference being that at 26 malicious clients there are temporarily two clusters that contain malicious clients before eventually all of the malicious clients form into one cluster.
 This is shown in Figure \ref{fig:1D_no_global} where each line represents a different cluster.
 \begin{figure}[htbp]
 	\centering
@@ -369,13 +390,13 @@ As such, there was no overlap or poisoning at all, not even by a single client.
 
 \subsection{Free-Riders}
 The final step in achieving all that was set out to do is to help conquer the free-riders.
-The 2 options that are present are the no global method and the selective method.
+The two options that are present are the no global method and the selective method.
 \\ \\
 For no global, the hope is that all of the free-riders will group together into their own cluster (due to their similarity) and will then not receive any contributions from proper clients.
 Or at the very least, not get a properly converged model.
 This might be harder due to the nature of the free-riders, and a few benign clients might be lost in the process if they get caught up in the same cluster as the free-riders.
 \\ \\
-For the selective method, it might be harder but the goal is to have the free-riders be in one of the 2 left-out clusters.
+For the selective method, it might be harder but the goal is to have the free-riders be in one of the two left-out clusters.
 This allows for some leniency hopefully but at the same time there is more risk associated with that there is an increased chance of them stealing a good model if they are included in the selected group.
 Either way, seeing how FedPADRC handles free-riders by itself as well as with malicious clients is what I shall test.
 \\ \\
@@ -388,11 +409,18 @@ Therefore, every other client (whether or not it is malicious) will do some form
 This then has a great distinctive effect of having the free-riders all look the same [\ref{fig:10mal10free_rep}] \textit{as well as} not being similar in any shape or form to the rest of the clients.
 As such, it never even gets the opportunity to learn even a little bit, meaning that the free-riders fail in their goal [\ref{fig:no_15free}] as well as there being no intellectual property theft.
 What's also good is that there wasn't even 1 free-rider that managed to sneak into the other clusters at any count of free-riders, they remained separate at all times.
+
+\begin{figure}[htbp]
+	\centering
+    \includegraphics[scale=0.5]{my_agg/graphs/10mal_10free_r0_no_global.png}
+    \caption{2D PCA Transform Representation with the No Global Personalisation Method - 10 Free, 10 Malicious at Round 0. This shows the separation of the clusters even when there are a combination of malicious and free-riding clients.}
+	\label{fig:10mal10free_rep}
+\end{figure}
 \\ \\
 It might end up being the case that FedPADRC isn't able to handle more than just one style of attack at any given time.
 Alas, that is not the case!
 Even when there is a combination of free-riders and malicious clients present [\ref{fig:no_13free_13mal}], it is not hindered in any-way-shape-or-form.
-All that then happens is that there are 2 clusters that have awful performance with the 3 benign clusters making up all of the remaining benign clients.
+All that then happens is that there are two clusters that have awful performance with the three benign clusters making up all of the remaining benign clients.
 \begin{figure}[htbp]
 	\centering
     \includegraphics[scale=0.5]{my_agg/graphs/no_global_13free_13mal.png}

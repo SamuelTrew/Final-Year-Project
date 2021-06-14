@@ -81,7 +81,7 @@ It should be noted that with the addition of malicious/faulty/free-riding client
 
 
 \subsection{Privacy Amplified Attack}
-With the most advanced attack being based on the difference of 2 models, it stands to assume that you ideally do not want the clients to have the global model at all to help reduce this attack.
+With the most advanced attack being based on the difference of two models, it stands to assume that you ideally do not want the clients to have the global model at all to help reduce this attack.
 This might not be sensible as the clients could need the global model to converge properly.
 So instead, if we were to then reduce the amount of time the clients got hold of the model, then their attack would be less deceptive and become clearer to the outside viewer.
 With the help of privacy amplification, we can do just that.
@@ -138,6 +138,13 @@ The main factor which caused the decrease in the accuracy was simply that with m
 This caused the benign clients to be getting blocked earlier and earlier and that's what causes the flat-lining that you see in experiments such as [\ref{fig:flat_line}].
 This carries onto about the 15\textsuperscript{th} round, where from then on out, all of the benign clients are getting blocked and so no learning can take place.
 This happens to AFA too at higher free-rider counts but to a much lesser extent and AFA never blocks more than 5 benign clients, lending it to still be able to learn at a decent-ish rate.
+
+\begin{figure}[htbp]
+	\centering
+    \includegraphics[scale=0.5]{free_riders/graphs/flat_line.png}
+	\caption{Error Rate Graph Showing the Flat-Lining of FedMGDA++ once all of the Benign Clients are Blocked}
+	\label{fig:flat_line}
+\end{figure}
 
 
 \section{Conclusion}

@@ -4,11 +4,17 @@ We look into several categories for initial testing such as AFA, FedMGDA+ and ag
 AFA and FedMGDA+ are especially promising in their ability to block faulty/malicious clients. 
 It is also important to check how the the local rounds affect detectibility of these bad clients.
 \\ \\
-Faulty Clients: 1, 3, 5, 7, 9, 11, 13, 15 17, 19
-\\
-Malicious Client: 2, 4, 6, 8, 10, 12, 14, 16, 18, 20
-\\
-Mixed: first 5 of each.
+In this chapter we assume:
+\begin{itemize}
+    \item Faulty Clients: 1, 3, 5, 7, 9, 11, 13, 15 17, 19
+    \item Malicious Client: 2, 4, 6, 8, 10, 12, 14, 16, 18, 20
+    \item Mixed: first 5 of each
+\end{itemize}
+% Faulty Clients: 1, 3, 5, 7, 9, 11, 13, 15 17, 19
+% \\
+% Malicious Client: 2, 4, 6, 8, 10, 12, 14, 16, 18, 20
+% \\
+% Mixed: first 5 of each.
 \\
 The weighting given to each client as to how much data they get varies from about 2-4\% and is hard-coded in.
 \\ \\
@@ -43,7 +49,7 @@ The results show:
 \end{enumerate}
 
 It may seem as if the solution is to use a low xi of one or two and a low deltaXi. 
-However, we observe that xi values that performed the best and blocked all of the malicious/faulty clients, then proceeds to block a hearty amount of benign clients as well.
+However, we observe that xi values that performed the best and blocked all of the malicious/faulty clients, then proceed to block a hearty amount of benign clients as well.
 Around 9-11 of the benign clients get blocked at some point in the training when the xi is one.
 \\ \\
 This is bad for non-obvious reasons. 
@@ -74,14 +80,18 @@ For this there were 50 federated rounds with a varying number of epochs per roun
 It should be noted that we made significant fixes and improvements to the initial implementation, to ensure its correctness. Ensuring the stability of Improved FedMGDA+ formed a significant portion of our project.
 
 \subsection{Threshold}
-We decided to base the threshold on a factor inverse to the number of clients involved.
-For example, with 30 clients I would try 1/60, 1/90, 1/3000 etc.
-This was so that any arbitrary number of clients could join or participate, unlike with a hard coded threshold.
+Using threshold that are based on a factor inverse to the number of clients involved proved fruitless.
+The idea was that if each client had an initial normalised weight of 1/30 (for 30 clients), then having the threshold be 1/60 or 1/300 would mean that the algorithm could handle varying numbers of clients much more easily.
 \\ \\
-This ended up being quite a disappointing investigation as we had initially gone into this thinking that the weights we were checking against when deciding on blocking would get really small if the client was bad. 
 However, all we saw happen is that when the model identified clients as bad, their weights very heavily just went into the negative.
-This meant that no manner of threshold was going to have an impact as the weights would simply hop into the negative.
-There were some \textit{slight} deviations as shown in [\ref{fig:mgda_var}].
+This meant that no manner of factor-based threshold was going to have an impact as the weights would simply hop into the negative.
+There were some \textit{slight} deviations as shown in Figure \ref{fig:mgda_var}:
+\begin{figure}[htbp]
+	\centering
+    \includegraphics[scale=0.7]{initial/graphs/mgda_var.png}
+	\caption{FedMGDA+ Threshold Variance Demo}
+	\label{fig:mgda_var}
+\end{figure}
 
 \subsection{LR and Epochs}
 These two are linked by their relationship; if you increase the number of local epochs per federated round, then overall there will be more rounds of learning going on. 
@@ -114,20 +124,20 @@ The solution is to reduce the number of rounds that the aggregator runs for.
 \\ \\
 Finding the balance between these two options proved to be fairly simple: an epoch count of one simply never showed a low enough error rate so two will be the best starting point.
 In our project, we use an adaptive approach, and had the LR either increase or decrease as the rounds go on. 
-While we could have tried many LR update methods, such as a sinusoidal LR or one that increases and decreases, finding an optimal method would have introduced runaway complexity. It was also beyond the scope of this project.
+While we could have tried many LR update methods, such as a sinusoidal LR or one that increases and decreases, finding an optimal method would have introduced runaway complexity.
 \\ \\ 
 A decreasing LR from the values of [0.1, 0.09, 0.08, 0.07, 0.06, 0.05] to [0.05, 0.04, 0.03, 0.02, 0.01] in a linear fashion proved to be the best course of action.
 This followed a fairly logical course of thought, such that you want to start out with a higher LR initially to help differentiate between the clients more.
 Later on you would then become more certain that the clients should be benign and so you don't need as high of a LR.
-However, starting too high (>0.08) proved fruitless and ending too low just gave results that blocked clients later and later.
-The perfect balance here was around from a starting LR of 0.07 and ending up at 0.02, which caused the malicious clients to be blocked at around rounds 11-13.
+However, starting too high (\textgreater0.08) proved fruitless and ending too low just gave results that blocked clients later and later.
+The perfect balance here was around from a starting LR of 0.07 and ending up at 0.02 [\ref{fig:best_fedmgda+}], which caused the malicious clients to be blocked at around rounds 11-13.
 We also did some experiments with increasing LRs but not only did that follow less of a logical course of action, it subsequently did not provide any benefit or particularly good/useful results.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[scale=0.7]{initial/graphs/best_fed_result.png}
     \caption{The Error Rate graph from the best results from FedMGDA+. Notice that the performance doesn't change much but the main importance is the blocking.}
-    \label{fig:best_fedmfda+}
+    \label{fig:best_fedmgda+}
 \end{figure}
 
 \subsubsection{Through the Looking Glass}
@@ -147,15 +157,22 @@ In attacks where only malicious clients were present, sometimes next to no malic
 Even on certain combinations of faulty \& malicious attacks, the clients would just start classifying way too many benign clients as byzantine later on.
 This caused such poor performance that other weaker aggregators like MKRUM were out-performing it.
 \\ \\
-We also noticed that it was quite common for the weights of the model to look something akin to [8, 8, 9, 7, 10, \textbf{2}, \textbf{3}, 7, 6, 8, \textbf{1}].
+Another improvement made was to devise a standard deviation (std)-based approach where if the clients fell below a given threshold that would be two StDs from the mean then it would get blocked.
+This was done after noticing that it was quite common for the weights of the model to look something akin to [8, 8, 9, 7, 10, \textbf{2}, \textbf{3}, 7, 6, 8, \textbf{1}].
 Here the boldened numbers show weights of malicious clients that are very obviously malicious to our eyes but aren't being picked up due to not being negative or getting too low at all.
-So, we devise a standard deviation (std)-based approach where if the clients fell below a given threshold that would be two StDs from the mean then it would get blocked.
 However, as seems commonplace at this point, an adaptive approach was needed.
 When we tried keeping it static, depending on the attack, either clients would not be getting blocked when they needed to be, or too many benign clients would be getting blocked unnecessarily. 
 We took a very similar approach to the LR in that when clients got blocked, we increased the multiple of the number of StDs from the mean that it would take before a client got blocked and we decreased the std multiplier whenever the error increased.
 \\ \\
 This significantly improved the algorithm. While there were still certain attacks that worked better with aggregators like COMED and AFA, Most malicious clients were now getting blocked at a frequency on-par or exceeding that of AFA.
 Rather aptly, I dubbed this new method FedMGDA++.
+The comparison between the old and the new method is shown below:
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[scale=0.12]{initial/graphs/fedmgda_comp.png}
+    \caption{Comparison between the old FedMGDA+ and the new and improved FedMGDA++ with 8 Malicious Clients with MNIST}
+    \label{fig:fedmgda_comp}
+\end{figure}
 
 \section{Limitations of Robust Aggregators}
 Figuring out where the aggregators thrive and where they fall short is quite crucial to determining their relevant applications or whether or not they should be used in the first place.
@@ -173,7 +190,15 @@ After that not much happens until the 11-12 malicious client point.
 Here, AFA is the first to go [\ref{fig:11mal}] with FedMGDA++ and MKRUM not too far behind.
 What is most interesting is that AFA is still fully able to recognise all of the malicious clients.
 However, it does take up to the 20\textsuperscript{th} federated round before all of them are blocked.
-Compare this with FedMGDA++ at 12 and it becomes more clear to see as to why AFA starts to fail earlier.
+Compare this with FedMGDA++ at round 12 and it becomes more clear to see as to why AFA starts to fail earlier.
+\\ \\
+\begin{figure}[htbp]
+	\centering
+    \includegraphics[scale=0.7]{initial/graphs/11_malicious.png}
+	\caption{The Beginning of the End for Robust Aggregators with Malicious Clients}
+	\label{fig:11mal}
+\end{figure}
+
 \\ \\
 COMED ends up being the last survivor but slowly has reduced performance (down to around 60\% accuracy) before failing to learn at all.
 This happens at the 15 malicious client mark which is pretty much where you would expect to see a median based solution stop being effective.

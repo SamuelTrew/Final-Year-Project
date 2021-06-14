@@ -10,7 +10,7 @@ The three main categories of ML are:
     \item Reinforcement Learning: the agent tries to reach a certain goal and is given a score/reward depending on how well it achieves its goal.
 \end{enumerate}
 For the purposes of this project, we will only be focusing on Supervised Learning algorithms. 
-For unsupervised learning it might become a bit more difficult to properly evaluate if the model is being tampered with. 
+For Unsupervised Learning it might become a bit more difficult to properly evaluate if the model is being tampered with. 
 Human intervention is needed to check what hidden patterns the model is finding, which is unsustainable for testing purposes.
 
 
@@ -145,7 +145,7 @@ An example of how these layers come together and form a CNN is below:
     \label{fig:cnn-layers}
 \end{figure}
 
-For simple datasets like MNIST (where the dimensions of the images is only 28x28 and the image itself is fairly basic) we don't need a particularly complex NN beyond having the initial layer contain 784 (28x28) weights and so it doesn't necessarily benefit from a CNN. 
+For simple datasets like MNIST (where the dimensions of the images are only 28x28 and the image itself is fairly basic) we don't need a particularly complex NN beyond having the initial layer contain 784 (28x28) weights and so it doesn't necessarily benefit from a CNN. 
 For something like the MedMNIST \cite{medmnist} datasets, they are not in a higher dimension but are of higher complexity (i.e. more features are held within each image) than that of standard MNIST and so more greatly benefit from the use of a CNN. 
 Other examples of datasets that benefit this way are FashionMNIST \cite{fashion} and CIFAR-10 \cite{cifar}.
 \\ \\
